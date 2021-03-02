@@ -37,6 +37,12 @@ if [[ -d .profile.d ]]; then
 	mkdir -p "${profile_dir}/profile.d"
 	cp .profile.d/* "${profile_dir}/profile.d/"
 
+	cat <<'EOF' >"${profile_dir}/profile.d/cnb_shim_symlink.sh"
+if [[ -d /app && -d "$(pwd)/.heroku" && $(readlink -e "$(pwd)") != $(readlink -e "/app") && ! -e /app/.heroku ]]; then
+	ln -s "$(pwd)/.heroku" /app/.heroku || : # supress a non-success exit code
+fi
+EOF
+
 	mkdir -p "${profile_dir}/env.launch"
 	echo -n "$app_dir" >"${profile_dir}/env.launch/HOME.override"
 

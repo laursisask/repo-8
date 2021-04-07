@@ -38,7 +38,7 @@ if [[ -d .profile.d ]]; then
 	cp .profile.d/* "${profile_dir}/profile.d/"
 
 	cat <<'EOF' >"${profile_dir}/profile.d/cnb_shim_symlink.sh"
-if [[ -d /app && -d "$(pwd)/.heroku" && $(readlink -e "$(pwd)") != $(readlink -e "/app") && ! -e /app/.heroku ]]; then
+if [[ -d /app && -d "$(pwd)/.heroku" && $(readlink -e "$(pwd)") != "$(readlink -e "/app")" && ! -e /app/.heroku ]]; then
 	ln -s "$(pwd)/.heroku" /app/.heroku || : # supress a non-success exit code
 fi
 EOF

@@ -162,7 +162,7 @@ type Options struct {
 // purposes and on-the-fly key generation.
 // Keybase options can be applied when generating this new Keybase.
 func NewInMemory(cdc codec.Codec, opts ...Option) Keyring {
-	return newKeystore(keyring.NewArrayKeyring(nil), cdc, opts...)
+	return NewKeystore(keyring.NewArrayKeyring(nil), cdc, opts...)
 }
 
 // New creates a new instance of a keyring.
@@ -197,7 +197,7 @@ func New(
 		return nil, err
 	}
 
-	return newKeystore(db, cdc, opts...), nil
+	return NewKeystore(db, cdc, opts...), nil
 }
 
 type keystore struct {
@@ -206,7 +206,7 @@ type keystore struct {
 	options Options
 }
 
-func newKeystore(kr keyring.Keyring, cdc codec.Codec, opts ...Option) keystore {
+func NewKeystore(kr keyring.Keyring, cdc codec.Codec, opts ...Option) keystore {
 	// Default options for keybase
 	options := Options{
 		SupportedAlgos:       SigningAlgoList{hd.Secp256k1},

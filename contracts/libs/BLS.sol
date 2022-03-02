@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { ModexpInverse, ModexpSqrt } from "./ModExp.sol";
 import {
@@ -40,7 +40,7 @@ library BLS {
 
     // estimator address
     address private constant COST_ESTIMATOR_ADDRESS =
-        0x079d8077C465BD0BF0FC502aD2B846757e415661;
+        0x9F19c6456854FDA109DFC2B9aD45d9BF147c8557;
 
     function verifySingle(
         uint256[2] memory signature,

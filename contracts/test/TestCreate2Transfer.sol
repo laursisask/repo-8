@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { Create2Transfer } from "../Create2Transfer.sol";
@@ -52,7 +52,7 @@ contract TestCreate2Transfer is Create2Transfer {
         uint256 feeReceiver,
         bytes memory txs,
         Types.StateMerkleProof[] memory proofs
-    ) public returns (bytes32, uint256) {
+    ) public view returns (bytes32, uint256) {
         bytes32 newRoot;
         uint256 operationCost = gasleft();
         (newRoot, ) = processCreate2TransferCommit(

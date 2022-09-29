@@ -1,12 +1,23 @@
+-include pritunl.mk
+
 default: testacc
 
 # Run acceptance tests
 .PHONY: testacc
 testacc:
-	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 $(GO) test ./... -v $(TESTARGS) -timeout 120m
 
 # Generate provider documentation
 .PHONY: doc
 doc:
-	go generate
+	$(GO) generate
 
+# Go formatting
+.PHONY: fmt
+fmt:
+	$(GOFMT) -d -e -s $(GO_FILES)
+
+# Go tidy
+.PHONY: tidy
+tidy:
+	$(GO) mod tidy

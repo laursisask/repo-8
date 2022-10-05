@@ -1,6 +1,7 @@
 -include pritunl.mk
 
-default: testacc
+default: build
+#default: testacc
 
 # Run acceptance tests
 .PHONY: testacc
@@ -21,3 +22,8 @@ fmt:
 .PHONY: tidy
 tidy:
 	$(GO) mod tidy
+
+# Go build
+.PHONY: build
+build:
+	$(GO) build

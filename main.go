@@ -18,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	opts := &plugin.ServeOpts{
-		Debug: debugMode,
+		Debug:        debugMode,
 		ProviderAddr: "registry.terraform.io/contentsquare/pritunl",
 		ProviderFunc: provider.New(version),
 	}

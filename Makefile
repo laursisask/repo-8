@@ -26,4 +26,9 @@ tidy:
 # Go build
 .PHONY: build
 build:
-	$(GO) build
+	$(GO) build -o terraform-$(PKG_TYPE)-$(PKG_NAME)
+
+# Clean
+.PHONY: clean
+clean:
+	$(RM) terraform-$(PKG_TYPE)-$(PKG_NAME)

@@ -96,7 +96,7 @@
       "description": "Synthesize project files",
       "steps": [
         {
-          "exec": "node .projenrc.js"
+          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
         }
       ]
     },
@@ -126,20 +126,23 @@
       "description": "Runs eslint against the codebase",
       "steps": [
         {
-          "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern src test build-tools .projenrc.js"
+          "exec": "eslint --ext .ts,.tsx --fix --no-error-on-unmatched-pattern src test build-tools projenrc .projenrc.ts"
         }
       ]
     },
-    "integration-test": {
-      "name": "integration-test",
+    "integrationtest": {
+      "name": "integrationtest",
+      "description": "Runs integration tests",
       "steps": [
         {
-          "name": "tsc",
-          "exec": "tsc --build tsconfig.dev.json"
+          "exec": "ts-node --project tsconfig.dev.json .projenrc.ts"
+        },
+        {
+          "exec": "jsii --silence-warnings=reserved-word"
         },
         {
           "name": "integration-test",
-          "exec": "integ-runner --parallel-regions=eu-central-1"
+          "exec": "integ-runner --app=\"ts-node {filePath}\" --test-regex=\"test/integ.[a-z-_]+.ts$\" --parallel-regions=eu-central-1 --update-on-failed"
         }
       ]
     },
@@ -154,7 +157,21 @@
     },
     "package-all": {
       "name": "package-all",
-      "description": "Packages artifacts for all target languages"
+      "description": "Packages artifacts for all target languages",
+      "steps": [
+        {
+          "spawn": "package:js"
+        }
+      ]
+    },
+    "package:js": {
+      "name": "package:js",
+      "description": "Create js language bindings",
+      "steps": [
+        {
+          "exec": "jsii-pacmak -v --target js"
+        }
+      ]
     },
     "post-compile": {
       "name": "post-compile",
@@ -164,10 +181,6 @@
           "spawn": "docgen"
         }
       ]
-    },
-    "post-upgrade": {
-      "name": "post-upgrade",
-      "description": "Runs after upgrading dependencies"
     },
     "pre-compile": {
       "name": "pre-compile",
@@ -232,45 +245,6 @@
       "steps": [
         {
           "builtin": "release/reset-version"
-        }
-      ]
-    },
-    "upgrade": {
-      "name": "upgrade",
-      "description": "upgrade dependencies",
-      "env": {
-        "CI": "0"
-      },
-      "steps": [
-        {
-          "exec": "npm update npm-check-updates"
-        },
-        {
-          "exec": "npm-check-updates --dep dev --upgrade --target=minor --reject='aws-cdk-lib,constructs'"
-        },
-        {
-          "exec": "npm-check-updates --dep optional --upgrade --target=minor --reject='aws-cdk-lib,constructs'"
-        },
-        {
-          "exec": "npm-check-updates --dep peer --upgrade --target=minor --reject='aws-cdk-lib,constructs'"
-        },
-        {
-          "exec": "npm-check-updates --dep prod --upgrade --target=minor --reject='aws-cdk-lib,constructs'"
-        },
-        {
-          "exec": "npm-check-updates --dep bundle --upgrade --target=minor --reject='aws-cdk-lib,constructs'"
-        },
-        {
-          "exec": "npm install"
-        },
-        {
-          "exec": "npm update"
-        },
-        {
-          "exec": "npx projen"
-        },
-        {
-          "spawn": "post-upgrade"
         }
       ]
     },

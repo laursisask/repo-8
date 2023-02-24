@@ -13,7 +13,7 @@ Or the following for Kotlin DSL
 implementation("com.segment.analytics.kotlin.destinations:bugsnag:<latest_version>")
 ```
 
-Also add the BugSnag Gradle plugin dependency to your Project project level build.gradle.
+Also add the BugSnag Gradle plugin dependency to your project level build.gradle.
 ```
 buildscript {
     dependencies {

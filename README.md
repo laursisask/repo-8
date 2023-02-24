@@ -1,4 +1,4 @@
-# Analytics-Kotlin Bugsnag
+# Analytics-Kotlin BugSnag
 
 Add Bugsnag support to your applications via this plugin for [Analytics-Kotlin](https://github.com/segmentio/analytics-kotlin)
 
@@ -8,11 +8,28 @@ To install the Segment-bugsnag integration, simply add this line to your gradle 
 ```
 implementation 'com.segment.analytics.kotlin.destinations:bugsnag:<latest_version>'
 ```
-
 Or the following for Kotlin DSL
-
 ```
 implementation("com.segment.analytics.kotlin.destinations:bugsnag:<latest_version>")
+```
+
+Also add the BugSnag Gradle plugin dependency to your Project project level build.gradle.
+```
+buildscript {
+    dependencies {
+        // ...
+        classpath "com.bugsnag:bugsnag-android-gradle-plugin:7.4.1"
+    }
+}
+```
+Or the following for Kotlin DSL
+```
+buildscript {
+    dependencies {
+        // ...
+        classpath("com.bugsnag:bugsnag-android-gradle-plugin:7.4.1")
+    }
+}
 ```
 
 ## Using the Plugin in your App

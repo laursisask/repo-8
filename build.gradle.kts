@@ -25,6 +25,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.0")
         classpath("org.jetbrains.kotlin:kotlin-serialization:1.6.0")
         classpath("com.android.tools.build:gradle:7.0.4")
+        classpath("com.bugsnag:bugsnag-android-gradle-plugin:7.4.1")
     }
 }
 

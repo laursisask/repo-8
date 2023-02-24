@@ -52,7 +52,7 @@ dependencies {
 
 // Partner Dependencies
 dependencies {
-    // TODO add your partner deps here
+    implementation("com.bugsnag:bugsnag-android:5.28.4")
 }
 
 // Test Dependencies

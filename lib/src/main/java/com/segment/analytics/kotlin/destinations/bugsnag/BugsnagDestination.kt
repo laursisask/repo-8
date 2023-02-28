@@ -42,6 +42,7 @@ class BugsnagDestination : DestinationPlugin(), AndroidLifecycle {
         val email: String = traitsMap["email"] ?: ""
         val name: String = traitsMap["name"]?: ""
         client?.setUser(payload.userId, email, name)
+        analytics.log("client!!.setUser(${payload.userId}, $email, $name)")
         val userKey = "User"
         for((key, value) in traitsMap) {
             client?.addMetadata(userKey, key, value)

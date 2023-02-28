@@ -34,6 +34,7 @@ class BugsnagDestinationTests {
     @MockK(relaxUnitFun = true)
     lateinit var mockedAnalytics: Analytics
     lateinit var mockedBugsnagDestination: BugsnagDestination
+
     init {
         MockKAnnotations.init(this)
     }

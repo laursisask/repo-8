@@ -18,6 +18,7 @@ local modified_paths = [
   'go.mod',
   'go.sum',
   '**/*.go',
+  '.drone.yml',
 ];
 
 local generateTagsCommands = [
@@ -59,7 +60,7 @@ local pipelines = {
       }),
     ])
     + pipeline.trigger.onModifiedPaths(modified_paths)
-    + pipeline.trigger.onPushToMainBranch(),
+    + pipeline.trigger.onPushToMasterBranch(),
 };
 
 local secrets = {

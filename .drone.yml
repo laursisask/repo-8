@@ -17,6 +17,7 @@ trigger:
     - go.mod
     - go.sum
     - '**/*.go'
+    - .drone.yml
 type: docker
 ---
 kind: pipeline
@@ -34,7 +35,7 @@ steps:
 trigger:
   branch:
     include:
-    - main
+    - master
   event:
     include:
     - push
@@ -43,6 +44,7 @@ trigger:
     - go.mod
     - go.sum
     - '**/*.go'
+    - .drone.yml
 type: docker
 ---
 get:
@@ -64,6 +66,6 @@ kind: secret
 name: .dockerconfigjson
 ---
 kind: signature
-hmac: b67243e2527bfcd0810d19138c8125579b827e9a91ef7cf0487cca67b3cc7015
+hmac: 211c712ce789ca0efd58f7ae929da9d071e37120bbcf2ea38cedbe1a37f321fa
 
 ...

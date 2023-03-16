@@ -1,8 +1,11 @@
 package prometheus_exporter
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/kalgurn/github-rate-limits-prometheus-exporter/internal/github_client"
@@ -11,32 +14,29 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var (
-	githubAccount = utils.GetOSVar("GITHUB_ACCOUNT_NAME")
-)
-
-func newLimitsCollector() *LimitsCollector {
+func newLimitsCollector(a *github_client.Account) *LimitsCollector {
 	return &LimitsCollector{
 		LimitTotal: prometheus.NewDesc(prometheus.BuildFQName("github", "limit", "total"),
 			"Total limit of requests for the installation",
 			nil, prometheus.Labels{
-				"account": githubAccount,
+				"account": a.AccountName,
 			}),
 		LimitRemaining: prometheus.NewDesc(prometheus.BuildFQName("github", "limit", "remaining"),
 			"Amount of remaining requests for the installation",
 			nil, prometheus.Labels{
-				"account": githubAccount,
+				"account": a.AccountName,
 			}),
 		LimitUsed: prometheus.NewDesc(prometheus.BuildFQName("github", "limit", "used"),
 			"Amount of used requests for the installation",
 			nil, prometheus.Labels{
-				"account": githubAccount,
+				"account": a.AccountName,
 			}),
 		SecondsLeft: prometheus.NewDesc(prometheus.BuildFQName("github", "limit", "time_left_seconds"),
 			"Time left in seconds until rate limit gets reset for the installation",
 			nil, prometheus.Labels{
-				"account": githubAccount,
+				"account": a.AccountName,
 			}),
+		Account: a,
 	}
 }
 
@@ -49,9 +49,9 @@ func (collector *LimitsCollector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *LimitsCollector) Collect(ch chan<- prometheus.Metric) {
 
-	auth := github_client.InitConfig()
+	auth := github_client.InitConfig(collector.Account)
 	limits := github_client.GetRemainingLimits(auth.InitClient())
-	log.Printf("Collected metrics for %s", githubAccount)
+	log.Printf("Collected metrics for %s", collector.Account.AccountName)
 	log.Printf("Limit: %d | Used: %d | Remaining: %d", limits.Limit, limits.Used, limits.Remaining)
 	//Write latest value for each metric in the prometheus metric channel.
 	//Note that you can pass CounterValue, GaugeValue, or UntypedValue types here.
@@ -70,10 +70,74 @@ func (collector *LimitsCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func Run() {
-	limit := newLimitsCollector()
+	if mi, _ := strconv.ParseBool(utils.GetOSVar("MULTI_ACCOUNT")); mi == true {
+		runMultipleAccounts()
+	} else {
+		runSingleAccount()
+	}
+}
+
+func runSingleAccount() {
+	account := getSingleAccount()
+	limit := newLimitsCollector(account)
 	prometheus.NewRegistry()
 	prometheus.MustRegister(limit)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":2112", nil)
+}
+
+func runMultipleAccounts() {
+	prometheus.NewRegistry()
+
+	accounts := getAccountsList()
+	for _, i := range accounts {
+		prometheus.MustRegister(newLimitsCollector(&i))
+	}
+
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(":2112", nil)
+}
+
+func getSingleAccount() *github_client.Account {
+	authType := utils.GetOSVar("GITHUB_AUTH_TYPE")
+	accountName := utils.GetOSVar("GITHUB_ACCOUNT_NAME")
+
+	if authType == "PAT" {
+		return &github_client.Account{
+			AuthType:    authType,
+			AccountName: accountName,
+			Token:       utils.GetOSVar("GITHUB_TOKEN"),
+		}
+	} else if authType == "APP" {
+		appID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_APP_ID"), 10, 64)
+		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
+
+		return &github_client.Account{
+			AuthType:       authType,
+			AccountName:    accountName,
+			AppID:          appID,
+			InstallationID: installationID,
+			PrivateKeyPath: utils.GetOSVar("GITHUB_PRIVATE_KEY_PATH"),
+		}
+	} else {
+		err := fmt.Errorf("invalid auth type")
+		utils.RespError(err)
+
+		return nil
+	}
+}
+
+func getAccountsList() []github_client.Account {
+	s := []byte(utils.GetOSVar("ACCOUNTS"))
+	var accounts []github_client.Account
+
+	err := json.Unmarshal(s, &accounts)
+	if err != nil {
+		err := fmt.Errorf("invalid format for accounts list")
+		utils.RespError(err)
+		return nil
+	}
+
+	return accounts
 }

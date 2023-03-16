@@ -22,3 +22,12 @@ type RateLimits struct {
 type GithubClient interface {
 	InitClient() *github.Client
 }
+
+type Account struct {
+	AuthType       string `json:"auth_type"`
+	AccountName    string `json:"account_name"`
+	AppID          int64  `json:"app_id"`
+	InstallationID int64  `json:"installation_id"`
+	PrivateKeyPath string `json:"private_key_path"`
+	Token          string `json:"token"`
+}

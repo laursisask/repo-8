@@ -1,0 +1,71 @@
+---
+kind: pipeline
+name: build pipeline
+steps:
+- image: plugins/docker
+  name: build + test
+  settings:
+    dry_run: true
+    repo: us.gcr.io/kubernetes-dev/github-rate-limit-prometheus-exporter
+    tags: latest
+trigger:
+  event:
+    include:
+    - pull_request
+  paths:
+    include:
+    - go.mod
+    - go.sum
+    - '**/*.go'
+    - .drone.yml
+type: docker
+---
+kind: pipeline
+name: build and push pipeline
+steps:
+- commands:
+  - echo -n "${DRONE_BRANCH}-${DRONE_COMMIT_SHA},latest" > .tags
+  image: plugins/gcr
+  name: build + test + push
+  settings:
+    json_key:
+      from_secret: gcr_admin
+    registry: us.gcr.io
+    repo: kubernetes-dev/github-rate-limit-prometheus-exporter
+trigger:
+  branch:
+    include:
+    - master
+  event:
+    include:
+    - push
+  paths:
+    include:
+    - go.mod
+    - go.sum
+    - '**/*.go'
+    - .drone.yml
+type: docker
+---
+get:
+  name: username
+  path: secret/data/common/docker-hub
+kind: secret
+name: docker-hub-username
+---
+get:
+  name: password
+  path: secret/data/common/docker-hub
+kind: secret
+name: docker-hub-password
+---
+get:
+  name: service-account
+  path: infra/data/ci/gcr-admin
+kind: secret
+name: .dockerconfigjson
+---
+kind: signature
+hmac: 211c712ce789ca0efd58f7ae929da9d071e37120bbcf2ea38cedbe1a37f321fa
+
+...

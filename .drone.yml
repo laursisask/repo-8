@@ -50,24 +50,12 @@ trigger:
 type: docker
 ---
 get:
-  name: username
-  path: secret/data/common/docker-hub
-kind: secret
-name: docker-hub-username
----
-get:
-  name: password
-  path: secret/data/common/docker-hub
-kind: secret
-name: docker-hub-password
----
-get:
   name: service-account
   path: infra/data/ci/gcr-admin
 kind: secret
-name: .dockerconfigjson
+name: gcr_admin
 ---
 kind: signature
-hmac: 5b4bb3a423e3c224735229f9bc8a4244f7d8c87f0b7233325b9157e6f835c1fa
+hmac: 739905feff5c1cd55ed7caec666debc3e2a9023bec87bde367352410005cce23
 
 ...

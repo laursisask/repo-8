@@ -7,10 +7,10 @@ local registry = 'us.gcr.io';
 local repo = 'kubernetes-dev/github-rate-limit-prometheus-exporter';
 local image_to_push = registry + '/' + repo;
 
+local gcr_secret = drone.secret.new('gcr_admin', 'infra/data/ci/gcr-admin', 'service-account');
+
 local images = {
-  alpine: 'alpine:3.17.0',
   drone_plugin: 'plugins/docker',
-  drone_cli: 'drone/cli:latest',
   docker_plugin_gcr: 'plugins/gcr',
 };
 
@@ -35,14 +35,8 @@ local pipelines = {
       step.new('build + test', image=images.drone_plugin)
       + step.withSettings({
         dry_run: true,
-        // password: {
-        //   from_secret: 'docker-hub-password',
-        // },
         repo: image_to_push,
         tags: 'latest',
-        // username: {
-        //   from_secret: 'docker-hub-username',
-        // },
       }),
     ])
     + pipeline.trigger.onModifiedPaths(modified_paths)
@@ -55,7 +49,7 @@ local pipelines = {
       step.new('build + test + push', image=images.docker_plugin_gcr)
       + step.withSettings({
         repo: repo,
-        json_key: { from_secret: 'gcr_admin' },
+        json_key: { from_secret: gcr_secret.name },
         registry: registry,
       }),
     ])
@@ -65,9 +59,7 @@ local pipelines = {
 
 local secrets = {
   secrets: [
-    drone.secret.new('docker-hub-username', 'secret/data/common/docker-hub', 'username'),
-    drone.secret.new('docker-hub-password', 'secret/data/common/docker-hub', 'password'),
-    drone.secret.new('.dockerconfigjson', 'infra/data/ci/gcr-admin', 'service-account'),
+    gcr_secret,
   ],
 };
 

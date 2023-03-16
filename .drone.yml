@@ -26,6 +26,8 @@ steps:
 - commands:
   - echo -n "${DRONE_BRANCH}-${DRONE_COMMIT_SHA},latest" > .tags
   image: plugins/gcr
+  name: Generate tags
+- image: plugins/gcr
   name: build + test + push
   settings:
     json_key:
@@ -66,6 +68,6 @@ kind: secret
 name: .dockerconfigjson
 ---
 kind: signature
-hmac: 211c712ce789ca0efd58f7ae929da9d071e37120bbcf2ea38cedbe1a37f321fa
+hmac: 5b4bb3a423e3c224735229f9bc8a4244f7d8c87f0b7233325b9157e6f835c1fa
 
 ...

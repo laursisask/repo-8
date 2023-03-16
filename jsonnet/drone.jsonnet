@@ -51,8 +51,8 @@ local pipelines = {
     pipeline.new('build and push pipeline')
     + pipeline.withSteps([
       step.new('Generate tags', image=images.docker_plugin_gcr)
-      + step.withCommands(generateTagsCommands)
-      + step.new('build + test + push', image=images.docker_plugin_gcr)
+      + step.withCommands(generateTagsCommands),
+      step.new('build + test + push', image=images.docker_plugin_gcr)
       + step.withSettings({
         repo: repo,
         json_key: { from_secret: 'gcr_admin' },

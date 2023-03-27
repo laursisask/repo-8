@@ -85,7 +85,6 @@ func TestNewLimitsCollector(t *testing.T) {
 		log.Print(err)
 	}
 	fmt.Println(resp)
-
 }
 
 func TestParseAccountsList(t *testing.T) {
@@ -149,4 +148,24 @@ func TestSingleAccountRunsOnEnvVarsAPP(t *testing.T) {
 
 	result, _ := getSingleAccount()
 	assert.True(t, reflect.DeepEqual(&expected, result))
+}
+
+func TestSingleAccountFailsOnInvalidAuthType(t *testing.T) {
+	os.Setenv("GITHUB_AUTH_TYPE", "POT")
+
+	err := runSingleAccount()
+	assert.NotNil(t, err)
+}
+
+func TestMultipleAccountFailsIfAnyInvalidAuthType(t *testing.T) {
+	os.Setenv(
+		"ACCOUNTS",
+		`[
+			{"auth_type":"PAT","account_name":"bot1","token":"asdf"},
+			{"auth_type":"OOPS","app_id":1234,"installation_id":67809,"private_key_path":"/home","account_name":"bot2"}
+		]`,
+	)
+
+	err := runMultipleAccounts()
+	assert.NotNil(t, err)
 }

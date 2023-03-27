@@ -2,6 +2,7 @@ package prometheus_exporter
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -71,36 +72,49 @@ func (collector *LimitsCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func Run() {
-	if _, present := os.LookupEnv("ACCOUNTS"); present {
-		runMultipleAccounts()
-	} else {
-		runSingleAccount()
-	}
-}
-
-func runSingleAccount() {
-	account := getSingleAccount()
-	limit := newLimitsCollector(account)
 	prometheus.NewRegistry()
-	prometheus.MustRegister(limit)
+	var err error
+
+	if _, present := os.LookupEnv("ACCOUNTS"); present {
+		err = runMultipleAccounts()
+	} else {
+		err = runSingleAccount()
+	}
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(":2112", nil)
 }
 
-func runMultipleAccounts() {
-	prometheus.NewRegistry()
+func runSingleAccount() error {
+	account, err := getSingleAccount()
+	if err != nil {
+		return err
+	}
 
+	limit := newLimitsCollector(account)
+	prometheus.MustRegister(limit)
+	return nil
+}
+
+func runMultipleAccounts() error {
 	accounts := getAccountsList()
+
+	if len(accounts) == 0 {
+		return errors.New("No valid accounts detected")
+	}
 	for _, i := range accounts {
 		prometheus.MustRegister(newLimitsCollector(&i))
 	}
 
-	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	return nil
 }
 
-func getSingleAccount() *github_client.Account {
+func getSingleAccount() (*github_client.Account, error) {
 	accountName := utils.GetOSVar("GITHUB_ACCOUNT_NAME")
 
 	switch authType := utils.GetOSVar("GITHUB_AUTH_TYPE"); authType {
@@ -109,7 +123,7 @@ func getSingleAccount() *github_client.Account {
 			AuthType:    authType,
 			AccountName: accountName,
 			Token:       utils.GetOSVar("GITHUB_TOKEN"),
-		}
+		}, nil
 	case "APP":
 		appID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_APP_ID"), 10, 64)
 		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
@@ -120,12 +134,9 @@ func getSingleAccount() *github_client.Account {
 			AppID:          appID,
 			InstallationID: installationID,
 			PrivateKeyPath: utils.GetOSVar("GITHUB_PRIVATE_KEY_PATH"),
-		}
+		}, nil
 	default:
-		err := fmt.Errorf("invalid auth type")
-		utils.RespError(err)
-
-		return nil
+		return nil, fmt.Errorf("invalid auth type")
 	}
 }
 

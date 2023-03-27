@@ -116,14 +116,14 @@ func runMultipleAccounts() error {
 func getSingleAccount() (*github_client.Account, error) {
 	accountName := utils.GetOSVar("GITHUB_ACCOUNT_NAME")
 
-	switch authType := utils.GetOSVar("GITHUB_AUTH_TYPE"); authType {
-	case "PAT":
+	switch authType := utils.GetOSVar("GITHUB_AUTH_TYPE"); github_client.AuthType(authType) {
+	case github_client.AuthTypePAT:
 		return &github_client.Account{
 			AuthType:    github_client.AuthTypePAT,
 			AccountName: accountName,
 			Token:       utils.GetOSVar("GITHUB_TOKEN"),
 		}, nil
-	case "APP":
+	case github_client.AuthTypeApp:
 		appID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_APP_ID"), 10, 64)
 		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
 

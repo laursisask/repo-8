@@ -52,11 +52,11 @@ func (c AppConfig) InitClient() *github.Client {
 func InitConfig(i *Account) GithubClient {
 	var auth GithubClient
 
-	if i.AuthType == "PAT" {
+	if i.AuthType == AuthTypePAT {
 		auth = TokenConfig{
 			Token: i.Token,
 		}
-	} else if i.AuthType == "APP" {
+	} else if i.AuthType == AuthTypeApp {
 		auth = AppConfig{
 			AppID:          i.AppID,
 			InstallationID: i.InstallationID,

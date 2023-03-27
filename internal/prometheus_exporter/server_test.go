@@ -100,19 +100,19 @@ func TestParseAccountsList(t *testing.T) {
 	expected := []github_client.Account{
 		{
 			AccountName: "bot1",
-			AuthType:    "PAT",
+			AuthType:    github_client.AuthTypePAT,
 			Token:       "asdf",
 		},
 		{
 			AccountName:    "bot2",
-			AuthType:       "APP",
+			AuthType:       github_client.AuthTypeApp,
 			AppID:          1234,
 			InstallationID: 67809,
 			PrivateKeyPath: "/home",
 		},
 	}
 
-	r := getAccountsList()
+	r, _ := getAccountsList()
 
 	assert.True(t, reflect.DeepEqual(expected, r))
 }
@@ -128,7 +128,8 @@ func TestSingleAccountRunsOnEnvVarsPAT(t *testing.T) {
 		Token:       "token_ahsd",
 	}
 
-	assert.True(t, reflect.DeepEqual(&expected, getSingleAccount()))
+	result, _ := getSingleAccount()
+	assert.True(t, reflect.DeepEqual(&expected, result))
 }
 
 func TestSingleAccountRunsOnEnvVarsAPP(t *testing.T) {
@@ -146,5 +147,6 @@ func TestSingleAccountRunsOnEnvVarsAPP(t *testing.T) {
 		PrivateKeyPath: "/tmp",
 	}
 
-	assert.True(t, reflect.DeepEqual(&expected, getSingleAccount()))
+	result, _ := getSingleAccount()
+	assert.True(t, reflect.DeepEqual(&expected, result))
 }

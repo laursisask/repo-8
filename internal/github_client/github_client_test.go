@@ -56,7 +56,7 @@ func TestInitConfigApp(t *testing.T) {
 	}
 
 	account := Account{
-		AuthType:       "APP",
+		AuthType:       AuthTypeApp,
 		AppID:          1,
 		InstallationID: 1,
 		PrivateKeyPath: "/home",
@@ -73,7 +73,7 @@ func TestInitConfigPAT(t *testing.T) {
 	}
 
 	account := Account{
-		AuthType: "PAT",
+		AuthType: AuthTypePAT,
 		Token:    "token_ahsd",
 	}
 

@@ -56,7 +56,7 @@ func (a *AuthType) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	if s == "PAT" || s == "APP" {
+	if s == string(AuthTypePAT) || s == string(AuthTypeApp) {
 		*a = AuthType(s)
 		return nil
 	}

@@ -101,16 +101,16 @@ func runMultipleAccounts() {
 }
 
 func getSingleAccount() *github_client.Account {
-	authType := utils.GetOSVar("GITHUB_AUTH_TYPE")
 	accountName := utils.GetOSVar("GITHUB_ACCOUNT_NAME")
 
-	if authType == "PAT" {
+	switch authType := utils.GetOSVar("GITHUB_AUTH_TYPE"); authType {
+	case "PAT":
 		return &github_client.Account{
 			AuthType:    authType,
 			AccountName: accountName,
 			Token:       utils.GetOSVar("GITHUB_TOKEN"),
 		}
-	} else if authType == "APP" {
+	case "APP":
 		appID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_APP_ID"), 10, 64)
 		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
 
@@ -121,7 +121,7 @@ func getSingleAccount() *github_client.Account {
 			InstallationID: installationID,
 			PrivateKeyPath: utils.GetOSVar("GITHUB_PRIVATE_KEY_PATH"),
 		}
-	} else {
+	default:
 		err := fmt.Errorf("invalid auth type")
 		utils.RespError(err)
 

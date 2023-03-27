@@ -1,6 +1,6 @@
 module github.com/kalgurn/github-rate-limits-prometheus-exporter
 
-go 1.17
+go 1.20
 
 require (
 	github.com/bradleyfalzon/ghinstallation/v2 v2.0.4

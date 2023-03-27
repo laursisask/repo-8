@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -70,7 +71,7 @@ func (collector *LimitsCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 func Run() {
-	if mi, _ := strconv.ParseBool(utils.GetOSVar("MULTI_ACCOUNT")); mi == true {
+	if _, present := os.LookupEnv("ACCOUNTS"); present {
 		runMultipleAccounts()
 	} else {
 		runSingleAccount()

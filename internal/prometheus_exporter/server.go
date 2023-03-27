@@ -2,7 +2,6 @@ package prometheus_exporter
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -102,11 +101,11 @@ func runSingleAccount() error {
 }
 
 func runMultipleAccounts() error {
-	accounts := getAccountsList()
-
-	if len(accounts) == 0 {
-		return errors.New("No valid accounts detected")
+	accounts, err := getAccountsList()
+	if err != nil {
+		return err
 	}
+
 	for _, i := range accounts {
 		prometheus.MustRegister(newLimitsCollector(&i))
 	}
@@ -120,7 +119,7 @@ func getSingleAccount() (*github_client.Account, error) {
 	switch authType := utils.GetOSVar("GITHUB_AUTH_TYPE"); authType {
 	case "PAT":
 		return &github_client.Account{
-			AuthType:    authType,
+			AuthType:    github_client.AuthTypePAT,
 			AccountName: accountName,
 			Token:       utils.GetOSVar("GITHUB_TOKEN"),
 		}, nil
@@ -129,7 +128,7 @@ func getSingleAccount() (*github_client.Account, error) {
 		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
 
 		return &github_client.Account{
-			AuthType:       authType,
+			AuthType:       github_client.AuthTypeApp,
 			AccountName:    accountName,
 			AppID:          appID,
 			InstallationID: installationID,
@@ -140,16 +139,14 @@ func getSingleAccount() (*github_client.Account, error) {
 	}
 }
 
-func getAccountsList() []github_client.Account {
+func getAccountsList() ([]github_client.Account, error) {
 	s := []byte(utils.GetOSVar("ACCOUNTS"))
 	var accounts []github_client.Account
 
 	err := json.Unmarshal(s, &accounts)
 	if err != nil {
-		err := fmt.Errorf("invalid format for accounts list")
-		utils.RespError(err)
-		return nil
+		return nil, err
 	}
 
-	return accounts
+	return accounts, nil
 }

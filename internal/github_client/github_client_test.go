@@ -2,7 +2,6 @@ package github_client
 
 import (
 	"math"
-	"os"
 	"testing"
 	"time"
 
@@ -50,42 +49,36 @@ func TestGetRemainingLimits(t *testing.T) {
 }
 
 func TestInitConfigApp(t *testing.T) {
-	os.Setenv("GITHUB_AUTH_TYPE", "APP")
-	os.Setenv("GITHUB_APP_ID", "1")
-	os.Setenv("GITHUB_INSTALLATION_ID", "1")
-	os.Setenv("GITHUB_PRIVATE_KEY_PATH", "/home")
-
 	testAuth := AppConfig{
 		AppID:          1,
 		InstallationID: 1,
 		PrivateKeyPath: "/home",
 	}
 
-	appInitConfig := InitConfig()
+	account := Account{
+		AuthType:       AuthTypeApp,
+		AppID:          1,
+		InstallationID: 1,
+		PrivateKeyPath: "/home",
+	}
+
+	appInitConfig := InitConfig(&account)
 
 	assert.Equal(t, appInitConfig, testAuth, "should be equal")
-
 }
 
 func TestInitConfigPAT(t *testing.T) {
-	os.Setenv("GITHUB_AUTH_TYPE", "PAT")
-	os.Setenv("GITHUB_TOKEN", "token_ahsd")
-
 	testAuth := TokenConfig{
 		Token: "token_ahsd",
 	}
 
-	patInitConfig := InitConfig()
+	account := Account{
+		AuthType: AuthTypePAT,
+		Token:    "token_ahsd",
+	}
 
-	assert.Equal(t, patInitConfig, testAuth, "should be equal")
+	patInitConfig := InitConfig(&account)
 
-}
-
-func TestInitConfigFailure(t *testing.T) {
-	os.Setenv("GITHUB_AUTH_TYPE", "test")
-
-	patInitConfig := InitConfig()
-
-	assert.Equal(t, nil, patInitConfig)
+	assert.Equal(t, testAuth, patInitConfig, "should be equal")
 
 }

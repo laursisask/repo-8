@@ -2,7 +2,9 @@ package github_client
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
@@ -49,20 +51,30 @@ func (c AppConfig) InitClient() *github.Client {
 	return github.NewClient(&http.Client{Transport: itr})
 }
 
-func InitConfig(i *Account) GithubClient {
+func InitConfig() GithubClient {
+	// determine type (app or pat)
 	var auth GithubClient
-
-	if i.AuthType == AuthTypePAT {
+	authType := utils.GetOSVar("GITHUB_AUTH_TYPE")
+	if authType == "PAT" {
 		auth = TokenConfig{
-			Token: i.Token,
+			Token: utils.GetOSVar("GITHUB_TOKEN"),
 		}
-	} else if i.AuthType == AuthTypeApp {
+
+	} else if authType == "APP" {
+		appID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_APP_ID"), 10, 64)
+		installationID, _ := strconv.ParseInt(utils.GetOSVar("GITHUB_INSTALLATION_ID"), 10, 64)
+
 		auth = AppConfig{
-			AppID:          i.AppID,
-			InstallationID: i.InstallationID,
-			PrivateKeyPath: i.PrivateKeyPath,
+			AppID:          appID,
+			InstallationID: installationID,
+			PrivateKeyPath: utils.GetOSVar("GITHUB_PRIVATE_KEY_PATH"),
 		}
+	} else {
+		err := fmt.Errorf("invalid auth type")
+		utils.RespError(err)
+		return nil
 	}
 
 	return auth
+
 }

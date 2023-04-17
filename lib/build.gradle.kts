@@ -10,7 +10,7 @@ val VERSION_NAME: String by project
 
 android {
     compileSdk = 33
-    buildToolsVersion = "31.0.0"
+    buildToolsVersion = "33.0.1"
 
     defaultConfig {
         multiDexEnabled = true
@@ -42,9 +42,9 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.2")
 
-    implementation("com.segment.analytics.kotlin:android:1.6.2")
+    implementation("com.segment.analytics.kotlin:android:1.10.3")
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.8.0")
 
     implementation("androidx.lifecycle:lifecycle-process:2.5.1")
     implementation("androidx.lifecycle:lifecycle-common-java8:2.5.1")
@@ -52,13 +52,13 @@ dependencies {
 
 // Partner Dependencies
 dependencies {
-    implementation("com.bugsnag:bugsnag-android:5.28.4")
+    implementation("com.bugsnag:bugsnag-android:5.29.0")
 }
 
 // Test Dependencies
 dependencies {
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     testImplementation("io.mockk:mockk:1.12.4")
 
     // Add Roboelectric dependencies.

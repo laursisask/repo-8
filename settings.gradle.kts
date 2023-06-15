@@ -1,4 +1,4 @@
-rootProject.name = "analytics-kotlin-integration-bugsnag"
+rootProject.name = "analytics-kotlin-bugsnag"
 include(":lib")
 includeBuild("publishing-plugins")
 include(":testapp")

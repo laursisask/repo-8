@@ -52,7 +52,7 @@ required-features = ["file_io"]
 name = "custom_assertion"
 
 [lib]
-crate-type = ["lib"]
+crate-type = ["lib", "cdylib"]
 
 [dependencies]
 asn1-rs = "0.5.2"

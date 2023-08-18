@@ -1,6 +1,5 @@
-# Build for Globalization
+# Partner Connector Registration
 
-Click a link to start your adventure.
 1. [Overview](#overview)
 2. [Glossary](#glossary)
 3. [Partner Registration Process: High Level Overview](#partner-registration-process-high-level-overview) 
@@ -11,8 +10,6 @@ Click a link to start your adventure.
 The Globalization Content Service is a collection of services that let you extend and integrate localization workflows within Adobe apps and services. This document prepares localization partners to integrate Globalization Content Service into their environments.
 
 From registering an organization, to setting projects, and enabling end-to-end localization workflows that includes sharing, retrieving, localizing, previewing assets, Globalization Content Service APIs let you perform all localization tasks while staying within the Adobe ecosphere. 
-
->**Note**: Follow this [link](#partner-onboarding-the-complete-workflow)   to learn more about Globalization Content Service.
 
 # Glossary
 In this guide, the following terms will be used.

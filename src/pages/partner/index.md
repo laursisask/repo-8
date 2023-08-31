@@ -138,9 +138,9 @@ Get your IMS credential from the Globalization Content Service team.
 
     ![Add Events](resources/ss_Add_Events.png)
 
-5. Select the **GCS Event** and click **Next**.
+5. Select the **Globalization Content Service Event** and click **Next**.
 
-    ![Add GCS Events](resources/ss_Add_Events_GCS.png)
+    ![Add Globalization Content Service Events](resources/ss_Add_Events_GCS.png)
 
 6. The **Configure event registration** screen shows four events that you can subscribe.      
    1. **LEVERAGE\_TM**: Used to extract text for localization out of an Adobe asset. Also, access the translation memory (TM) to enable the optimum re-use of a previously translated content. 
@@ -154,7 +154,7 @@ Get your IMS credential from the Globalization Content Service team.
 
     ![Select event](resources/ss_Configure_event_registration_2.png)      
 
-    Create a new service account (JWT) credential. Here, you create a JSON Web Token (JWT) that includes your credentials. You’ll begin your sessions by exchanging the JWT for an access token at Adobe I/O console. Once access is granted, you start using GCS events. Since you created a public key while registering to Globalization Content Service APIs, you can use it to create JWT.
+    Create a new service account (JWT) credential. Here, you create a JSON Web Token (JWT) that includes your credentials. You’ll begin your sessions by exchanging the JWT for an access token at Adobe I/O console. Once access is granted, you start using Globalization Content Service events. Since you created a public key while registering to Globalization Content Service APIs, you can use it to create JWT.
 
 8. Select **Upload your public key.**
 

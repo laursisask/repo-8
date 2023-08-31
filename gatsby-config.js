@@ -15,11 +15,11 @@ module.exports = {
   siteMetadata: {
     pages: [
       {
-        title: 'GCS',
+        title: 'Globalization Content Service',
         path: '/'
       },
       {
-        title: 'GCS Overview',
+        title: 'Globalization Content Service Overview',
         path: 'overview/'
       },
       {
@@ -27,7 +27,7 @@ module.exports = {
         path: 'partner/'
       },
       {
-        title: 'GCS APIs',
+        title: 'Globalization Content Service APIs',
         path: 'api/',
       },
     ]

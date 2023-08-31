@@ -446,7 +446,7 @@ This Put API updates an existing service provider in the content system.
 
 > Path: /v1/providers/{provider}
 ### Key Parameters
-1. **provider**: Unique name provided to the provider by the GCS team
+1. **provider**: Unique name provided to the provider by the Globalization Content Service team
 1. **providerBean**: The name of the project under which tasks are created
 
 ### Sample Provider Bean
@@ -786,7 +786,7 @@ You get the following responses:
 |**sourceLocale**|string|Source locale for the task|
 |**sourceUrl**|string|Publicly available URLs (S3 or Azure) for downloading the source asset|
 |**targetAssetLocale**|AssetLocaleBean...}|Defines the target asset locale, includes locale, status and updatedDate. The asset information for each target asset locale is different. We have as many assets locale information as the number of locales for the assets. To retrieve assets for multiple locales make multiple API calls with asset and target locale. The locale in our example is fr-FR.|
-|**targetAssetUrl**|AssetUrlBean...}|Publicly available URLs (S3 or Azure) for downloading the translated locale assets. This URL represents the Xliff file that includes the source locale value and target locale information. Includes information on locale, creation date, url and urlType. <br/><br/>GCS system will use the denormalization worker to (1) download the translated information (2) convert it to the source format, (3) upload it to the storage system (S3 or Azure) and (4) send the denormalized system back to the content system.|
+|**targetAssetUrl**|AssetUrlBean...}|Publicly available URLs (S3 or Azure) for downloading the translated locale assets. This URL represents the Xliff file that includes the source locale value and target locale information. Includes information on locale, creation date, url and urlType. <br/><br/>Globalization Content Service system will use the denormalization worker to (1) download the translated information (2) convert it to the source format, (3) upload it to the storage system (S3 or Azure) and (4) send the denormalized system back to the content system.|
 |**taskName**|string|A unique name for the translation task. Here task name: TestTask916\_1|
 |**workflowInstanceId**|string|Useful when the AssetInfo bean is used as output. Unique string for the current workflow instance.|
 

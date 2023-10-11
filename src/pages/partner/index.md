@@ -44,11 +44,10 @@ The following workflow diagram describes the steps in the partner registration p
 
 ![Partner Integration Workflow](resources/Partner_Integration_Workflow.png)
 
-1. **Get an IMS token:** The Globalization Content Service team procures an IMS bearer token for your firm. Use this token to get authenticated through the Adobe I/O console.
-2. **Log on the Adobe I/O Console**: Use the IMS token to log in Adobe I/O console. Once verified, you can access the products and services based on the permissions granted to you.
-3. **Subscribe to APIs**: You can subscribe to the Adobe I/O Globalization Content Service APIs to manage projects, tasks, and assets.
-4. **Subscribe to events**: Using Adobe I/O journaling APIs, subscribe to events and get near real-time communication. Even if you have thousands of tasks needing localization every week, the event journal will help you get info as soon as tasks are being triggered at the product end. Based on task information received in events, retrieve assets, localize them, preview quality, and send final translated assets back to the product through the Adobe I/O Globalization Content Service APIs.
-5. **Create an OAuth Server-to-Server credential**: Add the new credential to your project to begin using the new credential to generate access tokens and update your application.
+1. **Log on the Adobe I/O Console**: Create an account and log in Adobe I/O console. Once verified, you can access the products and services based on the permissions granted to you.
+2. **Subscribe to APIs**: You can subscribe to the Adobe I/O Globalization Content Service APIs to manage projects, tasks, and assets.
+3. **Subscribe to events**: Using Adobe I/O journaling APIs, subscribe to events and get near real-time communication. Even if you have thousands of tasks needing localization every week, the event journal will help you get info as soon as tasks are being triggered at the product end. Based on task information received in events, retrieve assets, localize them, preview quality, and send final translated assets back to the product through the Adobe I/O Globalization Content Service APIs.
+4. **Create an OAuth Server-to-Server credential**: Add the new credential to your project to begin using the new credential to generate access tokens and update your application.
 
 # Partner Onboarding: The Complete Workflow
 
@@ -99,7 +98,7 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
 The new OAuth Server-to-Server credentials rely on the OAuth 2.0 client credentials grant. Therefore, you can use industry-standard OAuth 2.0 libraries to implement access token generation in your application.
 
-Unlike the Service Account (JWT) credential, the new credential does not use a public certificate and private key pair to generate access tokens. As an application developer, you do not have to periodically rotate the public certificates and private key pairs when they expire. Also, the credential setup process is greatly simplified, and you do not have to download and save the private key on your machine.
+This credential does not use a public certificate and private key pair to generate access tokens. As an application developer, you do not have to periodically rotate the public certificates and private key pairs when they expire. Also, the credential setup process is greatly simplified, and you do not have to download and save the private key on your machine.
 
 Lastly, while the new OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
 
@@ -131,12 +130,12 @@ For more information please browse to the site [https://developer.adobe.com/deve
 
    1. **LEVERAGE_TM**: Used to extract text for localization out of an Adobe asset. Also, access the translation memory (TM) to enable the optimum re-use of a previously translated content.
    2. **PROJECT_UPDATE**: Used to update the project configuration information. The configuration data can include info on locales, content provider system and so on.
-   3. **TRANSATE**: Used to trigger an event when a task is sent for localization.
+   3. **TRANSLATE**: Used to trigger an event when a task is sent for localization.
    4. **UPDATE_TM**: Used to update the translation memory. During the asset completion of manual translation, translated strings are saved in TM so that they can be used later if similar strings appear in a future task. It helps to reduce the cost of manual translation.
 
    ![Configure events](resources/ss_Configure_event_registration.png)
 
-7. Select the events you want to subscribe and press **Next**.
+7. Select the events you want to subscribe to and press **Next**.
 
    ![Select event](resources/ss_Configure_event_registration_2.png)
 

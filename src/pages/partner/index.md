@@ -96,7 +96,8 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
    ![Create A OAuth Server-to-Server](resources/ss_Create_OAuth.png)
 
-The new OAuth Server-to-Server credentials rely on the OAuth 2.0 client credentials grant. Therefore, you can use industry-standard OAuth 2.0 libraries to implement access token generation in your application.
+OAuth Server-to-Server credentials rely on the OAuth 2.0 client credentials grant. Therefore, you can use industry-standard OAuth 2.0 libraries to implement access token generation in your application.
+While OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
 
 This credential does not use a public certificate and private key pair to generate access tokens. As an application developer, you do not have to periodically rotate the public certificates and private key pairs when they expire. Also, the credential setup process is greatly simplified, and you do not have to download and save the private key on your machine.
 

@@ -92,22 +92,22 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
    ![Configure API](resources/ss_Configure_API.png)
    ![Configure API confirmation](resources/ss_Configure_API2.png)
 
-7. Generate OAuth Server-to-Server access token by clicking on to the CREDENTIALS section [We have redacted it.]
+7. Generate OAuth Server-to-Server access token by clicking on to the CREDENTIALS section [ Redacted ]
 
    ![Create A OAuth Server-to-Server](resources/ss_Create_OAuth.png)
 
-OAuth Server-to-Server credentials rely on the OAuth 2.0 client credentials grant. Therefore, you can use industry-standard OAuth 2.0 libraries to implement access token generation in your application.
-While OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
+    OAuth Server-to-Server credentials rely on the OAuth 2.0 client credentials grant. Therefore, you can use industry-standard OAuth 2.0 libraries to implement access token generation in your application.
+    While OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
 
-This credential does not use a public certificate and private key pair to generate access tokens. As an application developer, you do not have to periodically rotate the public certificates and private key pairs when they expire. Also, the credential setup process is greatly simplified, and you do not have to download and save the private key on your machine.
+    This credential does not use a public certificate and private key pair to generate access tokens. As an application developer, you do not have to periodically rotate the public certificates and private key pairs when they expire. Also, the credential setup process is greatly simplified, and you do not have to download and save the private key on your machine.
 
-Lastly, while the new OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
+    Lastly, while the new OAuth Server-to-Server credentials do not use expiring certificates, they still allow client secret rotation through the UI and API.
 
-For more information please browse to the site [https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/](https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/)
+    For more information please browse to the site [https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/](https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/)
 
- 8. Scroll down the screen and add to retrieve the clinet ID and clinet secret along with other information about the account.
+8. Scroll down the screen and add to retrieve the client ID and client secret along with other information about the account.
 
-![Generated OAuth Server-to-Server Credential](resources/ss_Generated_OAuth.png)
+    ![Generated OAuth Server-to-Server Credential](resources/ss_Generated_OAuth.png)
 
 9. The OAuth Server-to-Server Credential is generated. Feel free to copy the Generated OAuth or Sample Curl command.
 

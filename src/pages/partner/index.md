@@ -141,8 +141,7 @@ For more information please browse to the site [https://developer.adobe.com/deve
    ![Select event](resources/ss_Configure_event_registration_2.png)
 
 8. You can choose the existing OAuth Server-to-Server for authentication and select Next.
-    
-![Proceed to add OAuth](resources/ss_Configure_event_registration_Auth.png)
+   ![Proceed to add OAuth](resources/ss_Configure_event_registration_Auth.png)
 
 9. The **Event registration details** form is displayed. Fill in the event details. You can change **Event registration name** and write a short description in the **Event registration description** box.
 
@@ -164,11 +163,9 @@ For more information please browse to the site [https://developer.adobe.com/deve
 
 > The endpoint has the following URL structure:
 
-    ```java
-    
-    https://<events_on_ADOBE_io_path>/events/organizations/<unique_number>/integrations/<unique_number>/<unique_number>
-    
-    ```
+```java
+https://<events_on_ADOBE_io_path>/events/organizations/<unique_number>/integrations/<unique_number>/<unique_number>
+```
 
 # Build a Connector and Start Using Events and APIs
 

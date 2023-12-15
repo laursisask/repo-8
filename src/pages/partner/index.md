@@ -92,7 +92,14 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
    ![Configure API](resources/ss_Configure_API.png)
    ![Configure API confirmation](resources/ss_Configure_API2.png)
 
-7. Generate OAuth Server-to-Server access token by clicking on to the CREDENTIALS section [ Redacted ]
+7. Similar to the previous step, also add "I/O Management APIs" to your project.
+
+   ![](resources/ss_add_to_project.png)  
+8. Click **Next** & Add OAuth Server-to-Server authentication, then save configured API .
+
+   ![](resources/ss_io_mgmt_apis.png)     
+
+9. Generate OAuth Server-to-Server access token by clicking on to the CREDENTIALS section [ Redacted ]
 
    ![Create A OAuth Server-to-Server](resources/ss_Create_OAuth.png)
 
@@ -105,11 +112,11 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
     For more information please browse to the site [https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/](https://developer.adobe.com/developer-console/docs/guides/authentication/ServerToServerAuthentication/)
 
-8. Scroll down the screen and add to retrieve the client ID and client secret along with other information about the account.
+10. Scroll down the screen and add to retrieve the client ID and client secret along with other information about the account.
 
     ![Generated OAuth Server-to-Server Credential](resources/ss_Generated_OAuth.png)
 
-9. The OAuth Server-to-Server Credential is generated. Feel free to copy the Generated OAuth or Sample Curl command.
+11. The OAuth Server-to-Server Credential is generated. Feel free to copy the Generated OAuth or Sample Curl command.
 
 ## Onboard on to Adobe I/O Console to Consume Events
 
@@ -179,10 +186,11 @@ The journaling system functions as a ledger, storing all events. New entries (ev
 
 The enterprise that has registered for journaling receives near-real-time event notification. To gain access to the most recent events, the company can set up a continuous polling system. The journaling call functions similarly to a pull call. The first call retrieves events from the beginning of the serial number to the end of the last available data string. The next pull call can begin at the endpoint of the previous call and retrieve newer events. When iterated, the journaling process retrieves all events at the predefined pull frequency.
 
-Bookmark these two pages for understanding how to use Adobe I/O events and journaling APIs
+Bookmark these two pages for understanding how to use Adobe I/O events, Webhooks & journaling APIs
 
-- Adobe I/O Events: [https://www.Adobe.io/apis/experienceplatform/events/docs.html](https://www.adobe.io/apis/experienceplatform/events/docs.html)
-- Journaling APIs: [Adobe I/O Events Journaling API](https://www.adobe.io/apis/experienceplatform/events/docs.html#!adobedocs/adobeio-events/master/api/journaling_api.md).
+- Adobe I/O Events: [Adobe I/O Events Docs](https://www.adobe.io/apis/experienceplatform/events/docs.html)
+- Webhooks Guide: [Introduction to Adobe I/O Events Webhooks](https://developer.adobe.com/events/docs/guides/)
+- Journaling Guide: [Adobe I/O Events Journaling API](https://www.adobe.io/apis/experienceplatform/events/docs.html#!adobedocs/adobeio-events/master/api/journaling_api.md).
 
 We recommend that you thoroughly research the Journaling APIs and create the connector that is best suited to your needs.
 
@@ -390,8 +398,8 @@ A typical event will have the following information.
 {
   "eventCode": "TRANSLATE",
   "orgId": "test-org",
-  "projectName": "test-project",
-  "taskName": "test-task",
+  "projectId": "test-project",
+  "taskId": "test-task",
   "sourceLocale": "test-locale",
   "translationProviderOrgId": "test-translationProviderOrgId"
 }

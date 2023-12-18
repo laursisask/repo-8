@@ -380,4 +380,4 @@ Follow these guides:
 - Get an overview of the Globalization Content Service:
   Follow this [guide](../overview/index.md).
 
-- Enable a partner to use the Globalization Content Service: Follow this [ guide](../partner/index.md) to onboard on the Adobe I/O console and access the Globalization Content Service APIs.
+- Enable a partner to use the Globalization Content Service: Follow this [guide](../partner/index.md) to onboard on the Adobe I/O console and access the Globalization Content Service APIs.

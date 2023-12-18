@@ -1,7 +1,8 @@
 # Globalization Content Service APIs
 
 What do you want to understand today?
-1. [Overview of Globalization Content Service APIs ](#overview)
+
+1. [Overview of Globalization Content Service APIs](#overview)
 2. [APIs for Globalization Partners](#apis-for-globalization-partners)
 3. [Get All Assets API](#get-all-assets-api)
 4. [Download Individual Asset](#download-asset-api)
@@ -11,21 +12,29 @@ What do you want to understand today?
 8. [Cancel Existing Assets API](#cancel-existing-assets-api)
 
 ## Overview
+
 Globalization Content Service APIs are divided into four categories: admin, asset, project, and task.
 
 ### Admin-related APIs
+
 - Onboard a new enterprise to Globalization Content Service. Register a new organization or retrieve an existing organization.
 - Authenticate a user by getting IMS orgs and groups for the specified userToken.
 - Add or retrieve content systems, products, locales, service providers, or workflows.
 - Find assets and get scoping reports.
+
 ### Asset-related APIs
-- Get all assets for specified projects and tasks. Dive deeper and retrieve asset details that include info on locales, projects, tasks, and Org Id. 
+
+- Get all assets for specified projects and tasks. Dive deeper and retrieve asset details that include info on locales, projects, tasks, and Org Id.
 - Based on where you are in the localization workflow, you can update an asset, preview an asset, and then update and complete the asset or cancel the asset and restart localization process.
+
 ### Project-related APIs
-- Create or update a new project. 
-- Get a list of all projects that you can access or dive deeper and get the project details. 
+
+- Create or update a new project.
+- Get a list of all projects that you can access or dive deeper and get the project details.
 - Plan your work by getting all projects with task counts.
+
 ### Task-related APIs
+
 - Create, retrieve, or update a task.
 - Want to plan how many tasks you have, easy get a list of all tasks.
 - Fine-tune your search by looking for assets or tasks that meet certain criteria, such as locale, project name, status, or workflow. You can also zoom in on a task and retrieve more information.
@@ -35,31 +44,36 @@ Globalization Content Service APIs are divided into four categories: admin, asse
 
 # APIs for Globalization Partners
 
-A localization partner typically uses two types of APIs. 
+A localization partner typically uses two types of APIs.
 
 ### One time setup
+
 Register to Globalization Content Service and setup a task polling framework/connector. See [how to register to Globalization Content Service](../partner/index.md#partner-onboarding-the-complete-workflow).
 
 ### APIs for continual localization
-These include:
-* [Get all assets for the project](#get-all-assets-api)
-* [Download Individual Asset](#download-asset-api)
-* [Manual Translation of Downloaded Asset](#mt-download-asset-api)
-* [Upload Translated xliff to GCS Azure Storage](#upload-asset-api)
-* [Initiate Asset Locale Completion in GCS](#complete-asset-api)
-* [Cancel Existing Assets API](#cancel-existing-assets-api)
 
+These include:
+
+- [Get all assets for the project](#get-all-assets-api)
+- [Download Individual Asset](#download-asset-api)
+- [Manual Translation of Downloaded Asset](#mt-download-asset-api)
+- [Upload Translated xliff to GCS Azure Storage](#upload-asset-api)
+- [Initiate Asset Locale Completion in GCS](#complete-asset-api)
+- [Cancel Existing Assets API](#cancel-existing-assets-api)
 
 [](#_Update_Service_Provider_1)In the section below, you will learn about these APIs.
 
 ## Get All Assets API
-This API finds all the assets for the specified project and task received in IO Event. It returns information such as locale name, strings to be localized, last modified information and metadata. 
+
+This API finds all the assets for the specified project and task received in IO Event. It returns information such as locale name, strings to be localized, last modified information and metadata.
 
 `Path: /v1/projects/{project}/tasks/{task}/assets`
+
 ### Key Parameters
-1. **orgId**: The IMS organization id associated with the client. 
-1. **projectId**: The unique string of the project under which tasks are created
-1. **taskId:** Unique string that defines the task name. 
+
+1. **orgId**: The IMS organization id associated with the client.
+1. **projectId**: The unique id for the project under which tasks are created.
+1. **taskId:** A unique id for the translation task.
 
 ### Request URL
 
@@ -70,15 +84,17 @@ curl --request GET \
   --header 'x-api-key: <client_id>'
 ```
 
-
 ### Responses
+
 You get the following responses:
 
 1. **200 OK**: The 200 OK status code indicates that the request has been processed successfully on the server
-1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended. 
+1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended.
 1. **403 Forbidden**: The 403 Forbidden error status code indicates that the server has received the request but has refused to allow it. The client may have insufficient rights to a resource.
 1. **404 Not Found**: The 404 error is returned when the server can’t find the requested resource. It could be broken or dead link because of file movements or entering a non-existent task name.
+
 ### Understanding the successful response
+
 The following is the successful response with the 200 Response code.
 
 ```java
@@ -86,7 +102,7 @@ The following is the successful response with the 200 Response code.
 	"service": "GCS",
 	"response": [
 		{
-			"name": "<taskName>",
+			"name": "<assetName>",
 			"assetId": "<assetId>",
 			"sourceUrl": "https://gcsstorageprod.blob.core.windows.net/gcs/uploadFiles/<customer_org_id>/<AssetName>.json?sig=TsQ2n...eBQ%3D&se=2023-12-07T15%3A49%3A24Z&sv=2019-02-02&sp=r&sr=b",
 			"status": "IN_TRANSLATION",
@@ -122,19 +138,22 @@ Here are the key sections in the response:
 - **sourceURL**: Publicly available URLs (S3 or Azure) for downloading the source asset, can be located in response object with parameter "sourceUrl". This is just for reference and not to be consumed for translation process.
 - **status**: 200 ok, indicating request has been executed successfully
 - **mimeType**: Defines the nature and format of the asset (media type)
-- **createdDate**: Date when the asset was created; represented in ISO 8601 spec; e.g. format 2021-08-05T18:35:58Z 
-- **assetMetadata**: Details of the asset name and asset path 
+- **createdDate**: Date when the asset was created; represented in ISO 8601 spec; e.g. format 2021-08-05T18:35:58Z
+- **assetMetadata**: Details of the asset name and asset path
 - **assetLocale**: Information that helps define the source asset language. Details locale as fr-FR, status as Created and updatedDate value.
 - **assetUrls/url**: It is important to note here is that the actual asset URL to be used by the partner for translation is the "url" parameter in the response object under "assetUrls", which is in NORMALIZED state. The unique object key to locate this asset is below,
+
 ```java
-<customer_org_id>/<ProjectId>/<TaskId>/normalised/<AssetName>.json/en-US/<AssetName>.json.xlf
+<customer_org_id>/<ProjectId>/<TaskId>/normalized/<AssetName>.json/en-US/<AssetName>.json.xlf
 ```
 
 > **Note**: To know more about the Get Asset API, see [Get All Assets in Swagger](https://gcscore-dev-va7.stage.cloud.adobe.io/swagger-ui/index.html#/Asset%20Service/getAssetsUsingGET).
 
 ## Download individual asset
+
 This Get API donwloads an existing asset for a particular object key.
 Here, Object key referes to a location or unique path(in the GCS storage) for an asset.
+
 ### Request URL
 
 ```java
@@ -143,16 +162,21 @@ curl --request GET \
   --header 'Authorization: Bearer eyJhbGciOiJSU....' \
   --header 'x-api-key: <client_id>'
 ```
+
 ### Successful response
+
 The following is the successful response which is a byte stream with the 200 Response code.
 
 ```java
 Content of asset as byte array with Content-Type as	"application/octet-stream;charset=UTF-8"
 ```
+
 ## Manual translation of downloaded asset
+
 Manual translation of xliff asset downloaded in the previous step, offline by the translator.
 
 ## Upload translated xliff to GCS Azure Storage
+
 This Post API is used to upload the translated xliff to GCS Azure Storage (Partner can use their own storage and provide signed url which is accessible to GCS).
 
 ### Request URL
@@ -166,7 +190,9 @@ curl --request POST \
   --form file=@ <local file path to translated .XLF content> \
   --form orgId=<customer_org_id>
 ```
+
 ### Successful response
+
 ```java
 {
 	"service": "GCS Storage",
@@ -174,18 +200,22 @@ curl --request POST \
 	"success": true
 }
 ```
+
 ## Initiate asset locale completion in GCS
-This Put API initiates asset locale completion for the specified asset and locale in GCS with manually translated asset url obtained in previous step. If a source asset is being translated in three locales, then you need to call this API three times to complete per asset per locale localization. 
+
+This Put API initiates asset locale completion for the specified asset and locale in GCS with manually translated asset url obtained in previous step. If a source asset is being translated in three locales, then you need to call this API three times to complete per asset per locale localization.
 
 When you call Update asset and initiate asset complete, Globalization Content Service runs the complete asset workflow that will finally convert the translated [XLIFF](#_A_Sample_XLiff) file into the original file format and save it in the asset repository. The customer will get a URL of the target locale asset.
 
 > **Path**: /v1/projects/{project}/tasks/{task}/assets/{asset}/locales/{locale}/complete
+
 ### Key Parameters
-1. **asset name**: Unique string identifying the asset name. 
+
+1. **asset name**: Unique string identifying the asset name.
 1. **assetInfo**: A JSON object that describes asset properties. See the details of the assetinfo object below.
 1. **locale**: Defines the target locale
 1. **project:** Sets the project name.
-1. **task:** Sets the task name. 
+1. **task:** Sets the task name.
 
 ### Request URL
 
@@ -210,16 +240,18 @@ curl --request PUT \
 }'
 ```
 
-
 ### Responses
+
 You get the following responses:
 
 1. **200 OK**: The 200 OK status code indicates that the request has been processed successfully on the server
 1. **201 Created**: The 201 Created success status code indicates that the request is successful, and it has created a resource.
-1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended. 
+1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended.
 1. **403 Forbidden**: The 403 Forbidden error status code indicates that the server has received the request but has refused to allow it. The client may have insufficient rights to a resource.
 1. **404 Not Found**: The 404 error is returned when the server can’t find the requested resource. It could be broken or dead link because of file movement.
+
 ### Understanding the successful response
+
 Here’s a successful response:
 
 ```java
@@ -239,29 +271,27 @@ Here’s a successful response:
 }
 ```
 
+### Understanding the properties
 
-
-
-### Understanding the properties 
-
-|**Property**|**Type**|**Description**|
-| :- | :- | :- |
-|**assetId**|String|A unique ID that is used by the content system to track assets if needed.|
-|**assetMetadata**|[...]|[optional] An array of additional properties that can be added by the content system for easy asset retrieval, such as asset path. The project creation team can also use assetMetadata to pass information about the asset that can help in efficient localization.|
-|**assetName**|string|Unique name of the asset in a task. In our example, it’s “UserTest.html”|
-|**mimeType**|string|[optional] Defines the nature and format of the asset (media type)|
-|**orgId**|String|The IMS Org ID against which an org is authenticated into the Adobe I/O console. |
-|**projectId**|String|The Id of the project containing the tasks|
-|**sourceLocale**|String|Source locale for the task|
-|**sourceUrl**|String|Publicly available URLs (S3 or Azure) for downloading the source asset|
-|**targetAssetLocale**|AssetLocaleBean...}|Defines the target asset locale, includes locale, status and updatedDate. The asset information for each target asset locale is different. We have as many assets locale information as the number of locales for the assets. To retrieve assets for multiple locales make multiple API calls with asset and target locale.|
-|**targetAssetUrl**|AssetUrlBean...}|Publicly available URLs (S3 or Azure) for downloading the translated locale assets. This URL represents the Xliff file that includes the source locale value and target locale information. Includes information on locale, creation date, url and urlType. <br/><br/>The system will use the denormalization worker to (1) download the translated information (2) convert it to the source format, (3) upload it to the storage system (S3 or Azure) and (4) send the denormalized system back to the content system.|
-|**taskId**|String|A unique Id for the translation task. In our example, it’s “TestTask916\_1”|
-|**workflowInstanceId**|String|Useful when the AssetInfo bean is used as output. Unique string for the current workflow instance.|
+| **Property**           | **Type**            | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| :--------------------- | :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **assetId**            | String              | A unique ID that is used by the content system to track assets if needed.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **assetMetadata**      | [...]               | [optional] An array of additional properties that can be added by the content system for easy asset retrieval, such as asset path. The project creation team can also use assetMetadata to pass information about the asset that can help in efficient localization.                                                                                                                                                                                                                                                    |
+| **assetName**          | string              | Unique name of the asset in a task. In our example, it’s “UserTest.html”                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **mimeType**           | string              | [optional] Defines the nature and format of the asset (media type)                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **orgId**              | String              | The IMS Org ID against which an org is authenticated into the Adobe I/O console.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **projectId**          | String              | The Id of the project containing the tasks                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **sourceLocale**       | String              | Source locale for the task                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **sourceUrl**          | String              | Publicly available URLs (S3 or Azure) for downloading the source asset                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **targetAssetLocale**  | AssetLocaleBean...} | Defines the target asset locale, includes locale, status and updatedDate. The asset information for each target asset locale is different. We have as many assets locale information as the number of locales for the assets. To retrieve assets for multiple locales make multiple API calls with asset and target locale.                                                                                                                                                                                             |
+| **targetAssetUrl**     | AssetUrlBean...}    | Publicly available URLs (S3 or Azure) for downloading the translated locale assets. This URL represents the Xliff file that includes the source locale value and target locale information. Includes information on locale, creation date, url and urlType. <br/><br/>The system will use the denormalization worker to (1) download the translated information (2) convert it to the source format, (3) upload it to the storage system (S3 or Azure) and (4) send the denormalized system back to the content system. |
+| **taskId**             | String              | A unique id for the translation task.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **workflowInstanceId** | String              | Useful when the AssetInfo bean is used as output. Unique string for the current workflow instance.                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 > **Note**: To know more about updating an asset and initiating the asset complete process, see [Update Asset and Initiate Asset Complete API in Swagger](https://gcscore-dev-va7.stage.cloud.adobe.io/swagger-ui/index.html#/Asset%20Service/completeAssetUsingPUT).
 
 ### A Sample XLIFF File
+
 See a sample XLIFF file.
 
 ```java
@@ -291,15 +321,18 @@ See a sample XLIFF file.
 ```
 
 ## Cancel Existing Assets API
+
 This Put API cancels an existing asset and a locale. The cancelled asset is removed from the task list.
 
 > **Path**: /v1/projects/{project}/tasks/{task}/assets/{asset}/locales/{locale}
+
 ### Key Parameters
-1. **asset**: The IMS organization id associated with your account. 
-1. **locale**: The locale information of asset that needs to be cancelled. 
-1. **orgId** The IMS organization id associated with your account. 
-1. **project**: The Id of the project under which tasks are created
-1. **task:** Unique string that defines the task Id. 
+
+1. **asset**: The IMS organization id associated with your account.
+1. **locale**: The locale information of asset that needs to be cancelled.
+1. **orgId** The IMS organization id associated with your account.
+1. **project**: The Id of the project under which tasks are created.
+1. **task:** A unique id for the translation task.
 
 ### Request URL
 
@@ -311,14 +344,16 @@ curl --request PUT \
 ```
 
 ### Responses
+
 You get the following responses:
 
 1. **200 OK**: The 200 OK status code indicates that the request has been processed successfully on the server
-1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended. 
+1. **401 Unauthorized**: The 401 unauthorized error status response code indicates that the request was not processed because the destination resource's authentication credentials were invalid. Reauthenticating with right credentials is recommended.
 1. **403 Forbidden**: The 403 Forbidden error status code indicates that the server has received the request but has refused to allow it. The client may have insufficient rights to a resource.
 1. **404 Not Found**: The 404 error is returned when the server can’t find the requested resource. It could be broken or dead link because of file movements or entering a non-existent task name.
 
 ### Understanding the Successful Response
+
 ```java
 {
 	"locale": "ja-JP",
@@ -326,7 +361,6 @@ You get the following responses:
 	"updatedDate": "2023-12-13T07:23:27.643Z"
 }
 ```
-
 
 The key parameters in response are:
 
@@ -339,14 +373,11 @@ The key parameters in response are:
 
 > **Note**: To know more about canceling an existing asset, see [Cancel an existing asset API in Swagger](https://gcscore-dev-va7.stage.cloud.adobe.io/swagger-ui/index.html#/Asset%20Service/cancelAssetUsingPUT).
 
-
 ## Where do I find more information?
 
 Follow these guides:
 
-* Get an overview of the Globalization Content Service: 
-    Follow this [guide](../overview/index.md). 
-  
+- Get an overview of the Globalization Content Service:
+  Follow this [guide](../overview/index.md).
 
-* Enable a partner to use the Globalization Content Service: Follow this [ guide](../partner/index.md) to onboard on the Adobe I/O console and access the Globalization Content Service APIs.
-    
+- Enable a partner to use the Globalization Content Service: Follow this [ guide](../partner/index.md) to onboard on the Adobe I/O console and access the Globalization Content Service APIs.

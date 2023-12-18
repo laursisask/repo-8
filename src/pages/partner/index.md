@@ -94,10 +94,10 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
 7. Similar to the previous step, also add "I/O Management APIs" to your project.
 
-   ![](resources/ss_add_to_project.png)  
-8. Click **Next** & Add OAuth Server-to-Server authentication, then save configured API .
+   ![](resources/ss_add_to_project.png)
+8. Click **Next** & Add OAuth Server-to-Server authentication, then save configured API.
 
-   ![](resources/ss_io_mgmt_apis.png)     
+   ![](resources/ss_io_mgmt_apis.png)
 
 9. Generate OAuth Server-to-Server access token by clicking on to the CREDENTIALS section [ Redacted ]
 

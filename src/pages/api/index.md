@@ -366,7 +366,7 @@ The key parameters in response are:
 
 - **Project Id**: The Id of the project under which tasks are created
 - **Asset name**: An asset for which you want to cancel the translation workflow
-- **Task Id**: Unique string that defines the task Id
+- **Task Id**: A unique id for the translation task
 - **Locale**: The locale of the asset to be cancelled
 - **Status**: CANCELLED
 - **updatedDate**: 2021-09-16T04:02:32.969Z [date time of the cancellation]

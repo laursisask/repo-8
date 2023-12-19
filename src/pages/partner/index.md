@@ -120,8 +120,8 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
 ## Onboard on to Adobe I/O Console to Consume Events
 
-1. Login on the Adobe I/O Console.
-2. Create a new project.
+1. In the same project created above, we shall now add the events to be consumed.
+2. Click on **+Add to Project.**.
 3. Click on **Add Event.**
 
    ![Get started with your new project](resources/ss_new_project_creation.png)
@@ -395,13 +395,14 @@ Based on your operation, you can get the following response types.
 A typical event will have the following information.
 
 ```java
-{
-  "eventCode": "TRANSLATE",
-  "orgId": "test-org",
-  "projectId": "test-project",
-  "taskId": "test-task",
-  "sourceLocale": "test-locale",
-  "translationProviderOrgId": "test-translationProviderOrgId"
+{ 
+"orgId": "30F7..30A494004@AdobeOrg", 
+"projectId": "StageTest1", 
+"taskId": "TestTask1214_2", 
+"sourceLocale": "en-US", 
+"translationProviderOrgId": "5BD8..0A494114@AdobeOrg", 
+"targetLocale": "ja-JP", 
+"eventCode": "TRANSLATE"
 }
 ```
 

@@ -9,7 +9,7 @@ const project = new awscdk.AwsCdkConstructLibrary({
   keywords: ['aws', 'cdk', 'constructs'],
   depsUpgrade: false,
   authorAddress: '',
-  cdkVersion: '2.100.0',
+  cdkVersion: '2.128.0',
   defaultReleaseBranch: 'main',
   name: '@elisasre/cdk-constructs',
   packageManager: javascript.NodePackageManager.NPM,
@@ -56,6 +56,9 @@ project.addTask('integrationtest', {
 });
 
 project.buildWorkflow?.addPostBuildJob('integrationtest', {
+  concurrency: {
+    group: 'integrationtest',
+  },
   tools: {
     node: {
       version: nodejsVersion,
@@ -94,6 +97,7 @@ project.buildWorkflow?.addPostBuildJob('integrationtest', {
     },
   ],
 });
+
 
 project.buildWorkflow?.addPostBuildJob('automerge', {
   needs: ['integrationtest'],

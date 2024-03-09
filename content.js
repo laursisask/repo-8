@@ -62,7 +62,13 @@ function createOverlay() {
     input.value = "What project variables are in the project Octopus Copilot Function?"
     input.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     input.style.borderRadius = '5px'
-    topDiv.appendChild(input);
+    topDiv.appendChild(input)
+
+    // Create a new button element
+    var button = document.createElement('button');
+    button.innerText = 'Submit';
+    button.style.fontSize = '20px';
+    topDiv.appendChild(button);
 
     var answerHeading = document.createElement('h2');
     answerHeading.innerText = 'Answer';
@@ -95,17 +101,25 @@ function createOverlay() {
         destroyOverlay()
     }
 
+    function submit() {
+        var intervalId = setThinking()
+        input.disabled = true
+        button.disabled = true
+        chrome.runtime
+            .sendMessage({query: input.value})
+            .then(response => {
+                clearInterval(intervalId);
+                answer.value = response.answer
+                input.disabled = false
+                button.disabled = false
+            })
+    }
+
+    button.onclick = submit
+
     input.onkeydown = function (event) {
         if (event.keyCode === 13) {
-            var intervalId = setThinking()
-            input.readOnly = true
-            chrome.runtime
-                .sendMessage({query: input.value})
-                .then(response => {
-                    clearInterval(intervalId);
-                    answer.value = response.answer
-                    input.readOnly = false
-                })
+            submit()
             event.preventDefault()
             return false
         }

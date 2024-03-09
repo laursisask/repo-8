@@ -78,6 +78,23 @@ function createOverlay() {
     answer.style.borderRadius = '5px'
     bottomDiv.appendChild(answer);
 
+    var close = document.createElement('img');
+    close.src = chrome.runtime.getURL("cross.png")
+    close.style.position = 'fixed';
+    close.style.top = '0px';
+    close.style.right = '0px';
+    close.style.width = '32px';
+    close.style.height = '32px';
+    close.style.marginTop = '10px';
+    close.style.marginRight = '10px';
+    close.style.cursor = 'pointer';
+    close.style.zIndex = 10001;
+    overlay.appendChild(close)
+
+    close.onclick = function () {
+        destroyOverlay()
+    }
+
     input.onkeydown = function (event) {
         if (event.keyCode === 13) {
             var intervalId = setThinking()

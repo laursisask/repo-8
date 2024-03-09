@@ -663,7 +663,10 @@ function queryLlm(query, sendResponse) {
                             })
                     })
             })
-            .catch(error => sendResponse({answer: "An exception was thrown"}))
+            .catch(error => sendResponse({
+                answer: "An exception was thrown. If you are using this extension in early 2024, this may be a temporary error, and you can try again later. "
+                    + "If you are using the extension in late 2024, this extension is likely deprecated."
+            }))
     })
 }
 

@@ -572,7 +572,7 @@ function queryLlm(query, sendResponse) {
         const url = new URL(tabs[0].url)
         const space = tabs[0].url.split("/")[4]
 
-        fetch("http://localhost:7071/api/query_parse?message=" + encodeURIComponent(query))
+        fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
             .then(response => response.json())
             .then(entities => {
                 log("Extracted entities")
@@ -633,7 +633,7 @@ function queryLlm(query, sendResponse) {
                                     log("Space HCL")
                                     log(hcl)
 
-                                    fetch("http://localhost:7071/api/submit_query?message=" + encodeURIComponent(query),
+                                    fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
                                         {
                                             method: "POST",
                                             body: hcl

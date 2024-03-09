@@ -11,8 +11,13 @@
   },
   "host_permissions": [
     "https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/*",
-    "http://localhost:7071/*"],
-  "permissions": ["activeTab", "scripting"],
+    "http://localhost:7071/*",
+    "https://octopuscopilotproduction.azurewebsites.net/*"
+  ],
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
   "background": {
     "service_worker": "octoterra.js"
   }

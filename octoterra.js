@@ -567,7 +567,8 @@
 /********************************/
 // Custom scripts starts here
 /********************************/
-
+const error = "An exception was thrown. If you are using this extension in early 2024, this may be a temporary error, and you can try again later. "
+    + "If you are using the extension in late 2024, this extension is likely deprecated."
 const go = new Go();
 
 function is_empty_array(array) {
@@ -659,14 +660,12 @@ function queryLlm(query, sendResponse) {
                                         .then(answer => {
                                             sendResponse({answer: answer})
                                         })
+                                        .catch(error => sendResponse({answer: error}))
                                 })
                             })
                     })
             })
-            .catch(error => sendResponse({
-                answer: "An exception was thrown. If you are using this extension in early 2024, this may be a temporary error, and you can try again later. "
-                    + "If you are using the extension in late 2024, this extension is likely deprecated."
-            }))
+            .catch(error => sendResponse({answer: error}))
     })
 }
 

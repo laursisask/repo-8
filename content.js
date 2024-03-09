@@ -27,13 +27,20 @@ function createOverlay() {
     heading.style.textAlign = 'center';
     headingDiv.appendChild(heading);
 
+    // Create the img element
+    var img = document.createElement('img');
+    img.src = chrome.runtime.getURL("logo.png");
+    img.style.height = "1.625rem"
+    img.style.width = "1.625rem"
+    img.style.marginLeft = "1rem"
+    heading.appendChild(img);
+
     // Create the top div
     const topDiv = document.createElement('div');
     topDiv.style.height = '20vh';
     topDiv.style.width = '100%';
     topDiv.style.paddingLeft = '10%';
     topDiv.style.paddingRight = '10%';
-    //topDiv.style.background = 'blue'; // Added for visibility
     overlay.appendChild(topDiv);
 
     // Create the bottom div
@@ -42,7 +49,6 @@ function createOverlay() {
     bottomDiv.style.width = '100%';
     bottomDiv.style.paddingLeft = '10%';
     bottomDiv.style.paddingRight = '10%';
-    //bottomDiv.style.background = 'red'; // Added for visibility
     overlay.appendChild(bottomDiv);
 
     var queryHeading = document.createElement('h2');
@@ -55,6 +61,7 @@ function createOverlay() {
     input.style.fontSize = '20px';
     input.value = "What project variables are in the project Octopus Copilot Function?"
     input.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
+    input.style.borderRadius = '5px'
     topDiv.appendChild(input);
 
     var answerHeading = document.createElement('h2');
@@ -68,16 +75,22 @@ function createOverlay() {
     answer.style.fontSize = '20px';
     answer.style.height = '50vh';
     answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
+    answer.style.borderRadius = '5px'
     bottomDiv.appendChild(answer);
 
     input.onkeydown = function (event) {
         if (event.keyCode === 13) {
-            answer.value = "Processing..."
+            let count = 1
+            var intervalId = setInterval(function() {
+                count = (count + 1) % 3
+                answer.value = "Thinking" + ".".repeat(count + 1)
+            }, 1000);
             input.readOnly = true
             chrome
                 .runtime
                 .sendMessage({query: input.value})
                 .then(response => {
+                    clearInterval(intervalId);
                     answer.value = response.answer
                     input.readOnly = false
                 })

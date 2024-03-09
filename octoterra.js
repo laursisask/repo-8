@@ -14,7 +14,7 @@
     if (!globalThis.fs) {
         let outputBuf = "";
         globalThis.fs = {
-            constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // unused
+            constants: {O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1}, // unused
             writeSync(fd, buf) {
                 outputBuf += decoder.decode(buf);
                 const nl = outputBuf.lastIndexOf("\n");
@@ -32,44 +32,106 @@
                 const n = this.writeSync(fd, buf);
                 callback(null, n);
             },
-            chmod(path, mode, callback) { callback(enosys()); },
-            chown(path, uid, gid, callback) { callback(enosys()); },
-            close(fd, callback) { callback(enosys()); },
-            fchmod(fd, mode, callback) { callback(enosys()); },
-            fchown(fd, uid, gid, callback) { callback(enosys()); },
-            fstat(fd, callback) { callback(enosys()); },
-            fsync(fd, callback) { callback(null); },
-            ftruncate(fd, length, callback) { callback(enosys()); },
-            lchown(path, uid, gid, callback) { callback(enosys()); },
-            link(path, link, callback) { callback(enosys()); },
-            lstat(path, callback) { callback(enosys()); },
-            mkdir(path, perm, callback) { callback(enosys()); },
-            open(path, flags, mode, callback) { callback(enosys()); },
-            read(fd, buffer, offset, length, position, callback) { callback(enosys()); },
-            readdir(path, callback) { callback(enosys()); },
-            readlink(path, callback) { callback(enosys()); },
-            rename(from, to, callback) { callback(enosys()); },
-            rmdir(path, callback) { callback(enosys()); },
-            stat(path, callback) { callback(enosys()); },
-            symlink(path, link, callback) { callback(enosys()); },
-            truncate(path, length, callback) { callback(enosys()); },
-            unlink(path, callback) { callback(enosys()); },
-            utimes(path, atime, mtime, callback) { callback(enosys()); },
+            chmod(path, mode, callback) {
+                callback(enosys());
+            },
+            chown(path, uid, gid, callback) {
+                callback(enosys());
+            },
+            close(fd, callback) {
+                callback(enosys());
+            },
+            fchmod(fd, mode, callback) {
+                callback(enosys());
+            },
+            fchown(fd, uid, gid, callback) {
+                callback(enosys());
+            },
+            fstat(fd, callback) {
+                callback(enosys());
+            },
+            fsync(fd, callback) {
+                callback(null);
+            },
+            ftruncate(fd, length, callback) {
+                callback(enosys());
+            },
+            lchown(path, uid, gid, callback) {
+                callback(enosys());
+            },
+            link(path, link, callback) {
+                callback(enosys());
+            },
+            lstat(path, callback) {
+                callback(enosys());
+            },
+            mkdir(path, perm, callback) {
+                callback(enosys());
+            },
+            open(path, flags, mode, callback) {
+                callback(enosys());
+            },
+            read(fd, buffer, offset, length, position, callback) {
+                callback(enosys());
+            },
+            readdir(path, callback) {
+                callback(enosys());
+            },
+            readlink(path, callback) {
+                callback(enosys());
+            },
+            rename(from, to, callback) {
+                callback(enosys());
+            },
+            rmdir(path, callback) {
+                callback(enosys());
+            },
+            stat(path, callback) {
+                callback(enosys());
+            },
+            symlink(path, link, callback) {
+                callback(enosys());
+            },
+            truncate(path, length, callback) {
+                callback(enosys());
+            },
+            unlink(path, callback) {
+                callback(enosys());
+            },
+            utimes(path, atime, mtime, callback) {
+                callback(enosys());
+            },
         };
     }
 
     if (!globalThis.process) {
         globalThis.process = {
-            getuid() { return -1; },
-            getgid() { return -1; },
-            geteuid() { return -1; },
-            getegid() { return -1; },
-            getgroups() { throw enosys(); },
+            getuid() {
+                return -1;
+            },
+            getgid() {
+                return -1;
+            },
+            geteuid() {
+                return -1;
+            },
+            getegid() {
+                return -1;
+            },
+            getgroups() {
+                throw enosys();
+            },
             pid: -1,
             ppid: -1,
-            umask() { throw enosys(); },
-            cwd() { throw enosys(); },
-            chdir() { throw enosys(); },
+            umask() {
+                throw enosys();
+            },
+            cwd() {
+                throw enosys();
+            },
+            chdir() {
+                throw enosys();
+            },
         }
     }
 
@@ -544,7 +606,7 @@
         _makeFuncWrapper(id) {
             const go = this;
             return function () {
-                const event = { id: id, this: this, args: arguments };
+                const event = {id: id, this: this, args: arguments};
                 go._pendingEvent = event;
                 go._resume();
                 return event.result;
@@ -564,7 +626,7 @@ function is_empty_array(array) {
 }
 
 function log(message) {
-   console.log(message)
+    console.log(message)
 }
 
 function queryLlm(query, sendResponse) {
@@ -650,15 +712,19 @@ function queryLlm(query, sendResponse) {
 }
 
 chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
+    function (request, sender, sendResponse) {
         queryLlm(request.query, sendResponse)
         return true
     }
 );
 
 chrome.action.onClicked.addListener((tab) => {
-    chrome.scripting.executeScript({
-        target: {tabId: tab.id},
-        files: ['content.js']
-    });
+    const url = new URL(tab.url)
+    console.log(url.origin)
+    if (url.origin.match(/https:\/\/.+?\.octopus\.app/)) {
+        chrome.scripting.executeScript({
+            target: {tabId: tab.id},
+            files: ['content.js']
+        });
+    }
 });

@@ -80,14 +80,9 @@ function createOverlay() {
 
     input.onkeydown = function (event) {
         if (event.keyCode === 13) {
-            let count = 1
-            var intervalId = setInterval(function() {
-                count = (count + 1) % 3
-                answer.value = "Thinking" + ".".repeat(count + 1)
-            }, 1000);
+            var intervalId = setThinking()
             input.readOnly = true
-            chrome
-                .runtime
+            chrome.runtime
                 .sendMessage({query: input.value})
                 .then(response => {
                     clearInterval(intervalId);
@@ -98,6 +93,14 @@ function createOverlay() {
             return false
         }
     }
+}
+
+function setThinking() {
+    let count = 1
+    return setInterval(function () {
+        count = (count + 1) % 3
+        answer.value = "Thinking" + ".".repeat(count + 1)
+    }, 1000);
 }
 
 function destroyOverlay() {

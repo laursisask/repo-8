@@ -663,6 +663,7 @@ function queryLlm(query, sendResponse) {
                             })
                     })
             })
+            .catch(error => sendResponse({answer: "An exception was thrown"}))
     })
 }
 

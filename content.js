@@ -103,16 +103,18 @@ function createOverlay() {
 
     function submit() {
         var intervalId = setThinking()
-        input.disabled = true
-        button.disabled = true
-        chrome.runtime
-            .sendMessage({query: input.value})
-            .then(response => {
-                clearInterval(intervalId);
-                answer.value = response.answer
-                input.disabled = false
-                button.disabled = false
-            })
+        try {
+            input.disabled = true
+            button.disabled = true
+            chrome.runtime
+                .sendMessage({query: input.value})
+                .then(response => {
+                    clearThinking(answer, input, button, intervalId)
+                    answer.value = response.answer
+                })
+        } catch {
+            clearThinking(answer, input, button, intervalId)
+        }
     }
 
     button.onclick = submit
@@ -124,6 +126,13 @@ function createOverlay() {
             return false
         }
     }
+}
+
+function clearThinking(answer, input, button, intervalId) {
+    clearInterval(intervalId);
+    answer.value = ""
+    input.disabled = false
+    button.disabled = false
 }
 
 function setThinking() {

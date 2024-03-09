@@ -618,17 +618,17 @@ function queryLlm(query, sendResponse) {
                                 log(url.origin)
                                 log(space)
                                 log(excludeAllProjects)
-                                log((entities.project_names ? entities.project_names.join(",") : ""))
+                                log(entities.project_names ? entities.project_names.join(",") : "")
                                 log(excludeAllTargets)
-                                log((entities.target_names ? entities.target_names.join(",") : ""))
+                                log(entities.target_names ? entities.target_names.join(",") : "")
                                 log(excludeAllRunbooks)
-                                log((entities.runbook_names ? entities.runbook_names.join(",") : ""))
+                                log(entities.runbook_names ? entities.runbook_names.join(",") : "")
                                 log(excludeAllVariableSets)
-                                log((entities.library_variable_sets ? entities.library_variable_sets.join(",") : ""))
+                                log(entities.library_variable_sets ? entities.library_variable_sets.join(",") : "")
                                 log(excludeAllTenants)
-                                log((entities.tenant_names ? entities.tenant_names.join(",") : ""))
+                                log(entities.tenant_names ? entities.tenant_names.join(",") : "")
                                 log(excludeAllEnvironments)
-                                log((entities.environment_names ? entities.environment_names.join(",") : ""))
+                                log(entities.environment_names ? entities.environment_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Copyright 2018 The Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 "use strict";
 
 (() => {
@@ -14,7 +18,7 @@
     if (!globalThis.fs) {
         let outputBuf = "";
         globalThis.fs = {
-            constants: {O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1}, // unused
+            constants: { O_WRONLY: -1, O_RDWR: -1, O_CREAT: -1, O_TRUNC: -1, O_APPEND: -1, O_EXCL: -1 }, // unused
             writeSync(fd, buf) {
                 outputBuf += decoder.decode(buf);
                 const nl = outputBuf.lastIndexOf("\n");
@@ -32,106 +36,44 @@
                 const n = this.writeSync(fd, buf);
                 callback(null, n);
             },
-            chmod(path, mode, callback) {
-                callback(enosys());
-            },
-            chown(path, uid, gid, callback) {
-                callback(enosys());
-            },
-            close(fd, callback) {
-                callback(enosys());
-            },
-            fchmod(fd, mode, callback) {
-                callback(enosys());
-            },
-            fchown(fd, uid, gid, callback) {
-                callback(enosys());
-            },
-            fstat(fd, callback) {
-                callback(enosys());
-            },
-            fsync(fd, callback) {
-                callback(null);
-            },
-            ftruncate(fd, length, callback) {
-                callback(enosys());
-            },
-            lchown(path, uid, gid, callback) {
-                callback(enosys());
-            },
-            link(path, link, callback) {
-                callback(enosys());
-            },
-            lstat(path, callback) {
-                callback(enosys());
-            },
-            mkdir(path, perm, callback) {
-                callback(enosys());
-            },
-            open(path, flags, mode, callback) {
-                callback(enosys());
-            },
-            read(fd, buffer, offset, length, position, callback) {
-                callback(enosys());
-            },
-            readdir(path, callback) {
-                callback(enosys());
-            },
-            readlink(path, callback) {
-                callback(enosys());
-            },
-            rename(from, to, callback) {
-                callback(enosys());
-            },
-            rmdir(path, callback) {
-                callback(enosys());
-            },
-            stat(path, callback) {
-                callback(enosys());
-            },
-            symlink(path, link, callback) {
-                callback(enosys());
-            },
-            truncate(path, length, callback) {
-                callback(enosys());
-            },
-            unlink(path, callback) {
-                callback(enosys());
-            },
-            utimes(path, atime, mtime, callback) {
-                callback(enosys());
-            },
+            chmod(path, mode, callback) { callback(enosys()); },
+            chown(path, uid, gid, callback) { callback(enosys()); },
+            close(fd, callback) { callback(enosys()); },
+            fchmod(fd, mode, callback) { callback(enosys()); },
+            fchown(fd, uid, gid, callback) { callback(enosys()); },
+            fstat(fd, callback) { callback(enosys()); },
+            fsync(fd, callback) { callback(null); },
+            ftruncate(fd, length, callback) { callback(enosys()); },
+            lchown(path, uid, gid, callback) { callback(enosys()); },
+            link(path, link, callback) { callback(enosys()); },
+            lstat(path, callback) { callback(enosys()); },
+            mkdir(path, perm, callback) { callback(enosys()); },
+            open(path, flags, mode, callback) { callback(enosys()); },
+            read(fd, buffer, offset, length, position, callback) { callback(enosys()); },
+            readdir(path, callback) { callback(enosys()); },
+            readlink(path, callback) { callback(enosys()); },
+            rename(from, to, callback) { callback(enosys()); },
+            rmdir(path, callback) { callback(enosys()); },
+            stat(path, callback) { callback(enosys()); },
+            symlink(path, link, callback) { callback(enosys()); },
+            truncate(path, length, callback) { callback(enosys()); },
+            unlink(path, callback) { callback(enosys()); },
+            utimes(path, atime, mtime, callback) { callback(enosys()); },
         };
     }
 
     if (!globalThis.process) {
         globalThis.process = {
-            getuid() {
-                return -1;
-            },
-            getgid() {
-                return -1;
-            },
-            geteuid() {
-                return -1;
-            },
-            getegid() {
-                return -1;
-            },
-            getgroups() {
-                throw enosys();
-            },
+            getuid() { return -1; },
+            getgid() { return -1; },
+            geteuid() { return -1; },
+            getegid() { return -1; },
+            getgroups() { throw enosys(); },
             pid: -1,
             ppid: -1,
-            umask() {
-                throw enosys();
-            },
-            cwd() {
-                throw enosys();
-            },
-            chdir() {
-                throw enosys();
-            },
+            umask() { throw enosys(); },
+            cwd() { throw enosys(); },
+            chdir() { throw enosys(); },
         }
     }
 
@@ -173,6 +115,10 @@
             const setInt64 = (addr, v) => {
                 this.mem.setUint32(addr + 0, v, true);
                 this.mem.setUint32(addr + 4, Math.floor(v / 4294967296), true);
+            }
+
+            const setInt32 = (addr, v) => {
+                this.mem.setUint32(addr + 0, v, true);
             }
 
             const getInt64 = (addr) => {
@@ -268,7 +214,10 @@
 
             const timeOrigin = Date.now() - performance.now();
             this.importObject = {
-                go: {
+                _gotest: {
+                    add: (a, b) => a + b,
+                },
+                gojs: {
                     // Go's SP does not change as long as no Go code is running. Some operations (e.g. calls, getters and setters)
                     // may synchronously trigger a Go event handler. This makes Go code get executed in the middle of the imported
                     // function. A goroutine can switch to a new stack if the current stack is too small (see morestack function).
@@ -331,7 +280,7 @@
                                     this._resume();
                                 }
                             },
-                            getInt64(sp + 8) + 1, // setTimeout has been seen to fire up to 1 millisecond early
+                            getInt64(sp + 8),
                         ));
                         this.mem.setInt32(sp + 16, id, true);
                     },
@@ -606,7 +555,7 @@
         _makeFuncWrapper(id) {
             const go = this;
             return function () {
-                const event = {id: id, this: this, args: arguments};
+                const event = { id: id, this: this, args: arguments };
                 go._pendingEvent = event;
                 go._resume();
                 return event.result;

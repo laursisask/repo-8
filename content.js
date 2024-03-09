@@ -15,24 +15,39 @@ function createOverlay() {
     document.body.appendChild(overlay);
 
     // Create the top div
+    const headingDiv = document.createElement('div');
+    headingDiv.style.height = '10vh';
+    headingDiv.style.width = '100%';
+    headingDiv.style.paddingLeft = '10%';
+    headingDiv.style.paddingRight = '10%';
+    overlay.appendChild(headingDiv);
+
+    var heading = document.createElement('h1');
+    heading.innerText = 'Octopus AI';
+    heading.style.textAlign = 'center';
+    headingDiv.appendChild(heading);
+
+    // Create the top div
     const topDiv = document.createElement('div');
     topDiv.style.height = '20vh';
     topDiv.style.width = '100%';
     topDiv.style.paddingLeft = '10%';
     topDiv.style.paddingRight = '10%';
-    topDiv.style.paddingTop = '10vh';
     //topDiv.style.background = 'blue'; // Added for visibility
     overlay.appendChild(topDiv);
 
     // Create the bottom div
     const bottomDiv = document.createElement('div');
-    bottomDiv.style.height = '80vh';
+    bottomDiv.style.height = '70vh';
     bottomDiv.style.width = '100%';
     bottomDiv.style.paddingLeft = '10%';
     bottomDiv.style.paddingRight = '10%';
-    bottomDiv.style.paddingTop = '10vh';
     //bottomDiv.style.background = 'red'; // Added for visibility
     overlay.appendChild(bottomDiv);
+
+    var queryHeading = document.createElement('h2');
+    queryHeading.innerText = 'Query';
+    topDiv.appendChild(queryHeading);
 
     const input = document.createElement('textarea');
     input.id = "input"
@@ -42,21 +57,30 @@ function createOverlay() {
     input.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     topDiv.appendChild(input);
 
+    var answerHeading = document.createElement('h2');
+    answerHeading.innerText = 'Answer';
+    bottomDiv.appendChild(answerHeading);
+
     const answer = document.createElement('textarea');
     answer.id = "answer"
+    answer.readOnly = true
     answer.style.width = '100%';
     answer.style.fontSize = '20px';
-    answer.style.height = '60vh';
+    answer.style.height = '50vh';
     answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     bottomDiv.appendChild(answer);
 
     input.onkeydown = function (event) {
         if (event.keyCode === 13) {
             answer.value = "Processing..."
+            input.readOnly = true
             chrome
                 .runtime
                 .sendMessage({query: input.value})
-                .then(response => answer.value = response.answer)
+                .then(response => {
+                    answer.value = response.answer
+                    input.readOnly = false
+                })
             event.preventDefault()
             return false
         }

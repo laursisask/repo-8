@@ -684,5 +684,10 @@ chrome.action.onClicked.addListener((tab) => {
             target: {tabId: tab.id},
             files: ['content.js']
         });
+    } else {
+        chrome.scripting.executeScript({
+            target: {tabId: tab.id},
+            files: ['alert_error.js']
+        });
     }
 });

@@ -4,7 +4,6 @@
   "version": "1.0",
   "manifest_version": 3,
   "action": {
-    "default_popup": "octopusai.html",
     "default_icon": "octopusai.png"
   },
   "content_security_policy": {
@@ -13,7 +12,8 @@
   "host_permissions": [
     "https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/*",
     "http://localhost:7071/*"],
-  "permissions": [
-    "activeTab"
-  ]
+  "permissions": ["activeTab", "scripting"],
+  "background": {
+    "service_worker": "octoterra.js"
+  }
 }

@@ -22,7 +22,8 @@ function runWasmAdd() {
         fetch("http://localhost:7071/api/query_parse?message=" + encodeURIComponent(text.value))
             .then(response => response.json())
             .then(entities => {
-                logs.value += JSON.stringify(entities, null, 4) + "\n\n"
+                log("Extracted entities")
+                log(JSON.stringify(entities, null, 4))
 
                 //fetch("https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/raw/main/wasm/convert_project.wasm")
                 fetch("convert_project.wasm")
@@ -32,6 +33,7 @@ function runWasmAdd() {
                             .then(result => {
                                 go.run(result.instance);
 
+                                log("URL and space")
                                 log(JSON.stringify(url.origin))
                                 log(JSON.stringify(space))
 
@@ -75,8 +77,8 @@ function runWasmAdd() {
                                     entities.tenant_names ? entities.tenant_names.join(",") : ""
                                 ).then(hcl => {
 
-                                    logs.value += hcl + "\n"
-                                    logs.scrollTop = logs.scrollHeight
+                                    log("Space HCL")
+                                    log(hcl)
 
                                     fetch("http://localhost:7071/api/submit_query?message=" + encodeURIComponent(text.value),
                                         {

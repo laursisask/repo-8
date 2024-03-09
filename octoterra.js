@@ -614,6 +614,8 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("tenant") === -1
                                 const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
                                     query.toLowerCase().indexOf("environment") === -1
+                                const excludeAllFeeds = is_empty_array(entities.feed_names) &&
+                                    query.toLowerCase().indexOf("feed") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -630,6 +632,8 @@ function queryLlm(query, sendResponse) {
                                 log(entities.tenant_names ? entities.tenant_names.join(",") : "")
                                 log(excludeAllEnvironments)
                                 log(entities.environment_names ? entities.environment_names.join(",") : "")
+                                log(excludeAllFeeds)
+                                log(entities.feed_names ? entities.feed_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,
@@ -645,7 +649,9 @@ function queryLlm(query, sendResponse) {
                                     excludeAllTenants,
                                     entities.tenant_names ? entities.tenant_names.join(",") : "",
                                     excludeAllEnvironments,
-                                    entities.environment_names ? entities.environment_names.join(",") : ""
+                                    entities.environment_names ? entities.environment_names.join(",") : "",
+                                    excludeAllFeeds,
+                                    entities.feed_names ? entities.feed_names.join(",") : ""
                                 ).then(hcl => {
 
                                     log("Space HCL")

@@ -19,12 +19,13 @@ function runWasmAdd() {
         submit.disabled = true
         logs.value = ""
 
-        fetch(" http://localhost:7071/api/query_parse?message=" + encodeURIComponent(text.value))
+        fetch("http://localhost:7071/api/query_parse?message=" + encodeURIComponent(text.value))
             .then(response => response.json())
             .then(entities => {
                 logs.value += JSON.stringify(entities, null, 4) + "\n\n"
 
-                fetch("https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/raw/main/wasm/convert_project.wasm")
+                //fetch("https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/raw/main/wasm/convert_project.wasm")
+                fetch("convert_project.wasm")
                     .then(response => response.arrayBuffer())
                     .then(arrayBuffer => {
                         WebAssembly.instantiate(arrayBuffer, go.importObject)
@@ -45,6 +46,7 @@ function runWasmAdd() {
                                 const excludeAllTenants = is_empty_array(entities.tenant_names) &&
                                     text.value.toLowerCase().indexOf("tenant") === -1
 
+                                log("Arguments")
                                 log(url.origin)
                                 log(space)
                                 log(excludeAllProjects)
@@ -58,7 +60,7 @@ function runWasmAdd() {
                                 log(excludeAllTenants)
                                 log((entities.tenant_names ? entities.tenant_names.join(",") : ""))
 
-                                convertProject(
+                                convertSpace(
                                     url.origin,
                                     space,
                                     excludeAllProjects,
@@ -70,7 +72,7 @@ function runWasmAdd() {
                                     excludeAllVariableSets,
                                     entities.library_variable_sets ? entities.library_variable_sets.join(",") : "",
                                     excludeAllTenants,
-                                    entities.tenant_names ? entities.tenant_names.join(",") : "",
+                                    entities.tenant_names ? entities.tenant_names.join(",") : ""
                                 ).then(hcl => {
 
                                     logs.value += hcl + "\n"
@@ -95,3 +97,11 @@ function runWasmAdd() {
 }
 
 submit.onclick = runWasmAdd
+
+text.onkeydown = function(event) {
+    if (event.keyCode === 13) {
+        event.preventDefault()
+        runWasmAdd()
+        return false
+    }
+}

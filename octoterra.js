@@ -671,7 +671,7 @@ function queryLlm(query, sendResponse) {
                                 const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
                                     query.toLowerCase().indexOf("runbook") === -1
                                 const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
-                                    query.toLowerCase().indexOf("library") === -1
+                                    query.toLowerCase().indexOf("library variable set") === -1
                                 const excludeAllTenants = is_empty_array(entities.tenant_names) &&
                                     query.toLowerCase().indexOf("tenant") === -1
                                 const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
@@ -681,7 +681,7 @@ function queryLlm(query, sendResponse) {
                                 const excludeAllAccounts = is_empty_array(entities.account_names) &&
                                     query.toLowerCase().indexOf("account") === -1
                                 const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
-                                    query.toLowerCase().indexOf("cert") === -1
+                                    query.toLowerCase().indexOf("certificate") === -1
                                 const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
                                     query.toLowerCase().indexOf("lifecycle") === -1
                                 const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&

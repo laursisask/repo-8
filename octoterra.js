@@ -690,6 +690,8 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("policy") === -1
                                 const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
                                     query.toLowerCase().indexOf("tag") === -1
+                                const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
+                                    query.toLowerCase().indexOf("project group") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -720,6 +722,8 @@ function queryLlm(query, sendResponse) {
                                 log(entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "")
                                 log(excludeAllTagSets)
                                 log(entities.tagset_names ? entities.tagset_names.join(",") : "")
+                                log(excludeAllProjectGroups)
+                                log(entities.projectgroup_names ? entities.projectgroup_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,
@@ -749,7 +753,9 @@ function queryLlm(query, sendResponse) {
                                     excludeAllMachinePolicies,
                                     entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
                                     excludeAllTagSets,
-                                    entities.tagset_names ? entities.tagset_names.join(",") : ""
+                                    entities.tagset_names ? entities.tagset_names.join(",") : "",
+                                excludeAllProjectGroups,
+                                    entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
                                 ).then(hcl => {
 
                                     log("Space HCL")

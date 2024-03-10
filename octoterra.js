@@ -680,6 +680,10 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("feed") === -1
                                 const excludeAllAccounts = is_empty_array(entities.account_names) &&
                                     query.toLowerCase().indexOf("account") === -1
+                                const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
+                                    query.toLowerCase().indexOf("cert") === -1
+                                const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
+                                    query.toLowerCase().indexOf("lifecycle") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -700,6 +704,10 @@ function queryLlm(query, sendResponse) {
                                 log(entities.feed_names ? entities.feed_names.join(",") : "")
                                 log(excludeAllAccounts)
                                 log(entities.account_names ? entities.account_names.join(",") : "")
+                                log(excludeAllCertificates)
+                                log(entities.certificate_names ? entities.certificate_names.join(",") : "")
+                                log(excludeAllLifecycles)
+                                log(entities.lifecycle_names ? entities.lifecycle_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,
@@ -719,7 +727,11 @@ function queryLlm(query, sendResponse) {
                                     excludeAllFeeds,
                                     entities.feed_names ? entities.feed_names.join(",") : "",
                                     excludeAllAccounts,
-                                    entities.account_names ? entities.account_names.join(",") : ""
+                                    entities.account_names ? entities.account_names.join(",") : "",
+                                    excludeAllCertificates,
+                                    entities.certificate_names ? entities.certificate_names.join(",") : "",
+                                    excludeAllLifecycles,
+                                    entities.lifecycle_names ? entities.lifecycle_names.join(",") : ""
                                 ).then(hcl => {
 
                                     log("Space HCL")

@@ -686,6 +686,10 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("lifecycle") === -1
                                 const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
                                     query.toLowerCase().indexOf("pool") === -1
+                                const excludeAllMachinePolicies = is_empty_array(entities.machinepolicy_names) &&
+                                    query.toLowerCase().indexOf("policy") === -1
+                                const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
+                                    query.toLowerCase().indexOf("tag") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -712,6 +716,10 @@ function queryLlm(query, sendResponse) {
                                 log(entities.lifecycle_names ? entities.lifecycle_names.join(",") : "")
                                 log(excludeAllWorkerpools)
                                 log(entities.workerpool_names ? entities.workerpool_names.join(",") : "")
+                                log(excludeAllMachinePolicies)
+                                log(entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "")
+                                log(excludeAllTagSets)
+                                log(entities.tagset_names ? entities.tagset_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,
@@ -737,7 +745,11 @@ function queryLlm(query, sendResponse) {
                                     excludeAllLifecycles,
                                     entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
                                     excludeAllWorkerpools,
-                                    entities.workerpool_names ? entities.workerpool_names.join(",") : ""
+                                    entities.workerpool_names ? entities.workerpool_names.join(",") : "",
+                                    excludeAllMachinePolicies,
+                                    entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
+                                    excludeAllTagSets,
+                                    entities.tagset_names ? entities.tagset_names.join(",") : ""
                                 ).then(hcl => {
 
                                     log("Space HCL")

@@ -684,6 +684,8 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("cert") === -1
                                 const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
                                     query.toLowerCase().indexOf("lifecycle") === -1
+                                const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
+                                    query.toLowerCase().indexOf("pool") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -708,6 +710,8 @@ function queryLlm(query, sendResponse) {
                                 log(entities.certificate_names ? entities.certificate_names.join(",") : "")
                                 log(excludeAllLifecycles)
                                 log(entities.lifecycle_names ? entities.lifecycle_names.join(",") : "")
+                                log(excludeAllWorkerpools)
+                                log(entities.workerpool_names ? entities.workerpool_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,
@@ -731,7 +735,9 @@ function queryLlm(query, sendResponse) {
                                     excludeAllCertificates,
                                     entities.certificate_names ? entities.certificate_names.join(",") : "",
                                     excludeAllLifecycles,
-                                    entities.lifecycle_names ? entities.lifecycle_names.join(",") : ""
+                                    entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
+                                    excludeAllWorkerpools,
+                                    entities.workerpool_names ? entities.workerpool_names.join(",") : ""
                                 ).then(hcl => {
 
                                     log("Space HCL")

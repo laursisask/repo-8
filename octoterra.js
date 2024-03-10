@@ -616,6 +616,8 @@ function queryLlm(query, sendResponse) {
                                     query.toLowerCase().indexOf("environment") === -1
                                 const excludeAllFeeds = is_empty_array(entities.feed_names) &&
                                     query.toLowerCase().indexOf("feed") === -1
+                                const excludeAllAccounts = is_empty_array(entities.account_names) &&
+                                    query.toLowerCase().indexOf("account") === -1
 
                                 log("Arguments")
                                 log(url.origin)
@@ -634,6 +636,8 @@ function queryLlm(query, sendResponse) {
                                 log(entities.environment_names ? entities.environment_names.join(",") : "")
                                 log(excludeAllFeeds)
                                 log(entities.feed_names ? entities.feed_names.join(",") : "")
+                                log(excludeAllAccounts)
+                                log(entities.account_names ? entities.account_names.join(",") : "")
 
                                 convertSpace(
                                     url.origin,

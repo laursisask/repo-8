@@ -1,6 +1,6 @@
 {
-  "name": "Octopus AI",
-  "description": "Octopus AI Query Tool",
+  "name": "Octopus AI Experiment",
+  "description": "Experimental Octopus AI Query Tool",
   "version": "1.0",
   "manifest_version": 3,
   "action": {

@@ -781,7 +781,7 @@ function queryLlm(query, sendResponse) {
                                 promises.push(promise)
 
                                 Promise.all(promises).then(results => {
-                                    const context = results.join("\n")
+                                    const context = results.join("\n\n")
 
                                     log("Space Context")
                                     log(context)

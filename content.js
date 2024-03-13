@@ -82,6 +82,17 @@ function createOverlay() {
     answer.style.height = '50vh';
     answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     answer.style.borderRadius = '5px'
+    answer.value = `I am your AI assistant. Ask me anything and I'll try to answer it. For example, you can ask me:
+    
+    - What project variables are in the project \"Your project name\"?
+    - Where are the variables used in the project \"Your project name\"?
+    - What does \"Your project name\" do?
+    - What targets are in the space?
+    - What packages are used by the project \"Your project name\"?
+    - What accounts are used by the "project \"Your project name\"?
+    
+As an AI I sometimes make mistakes. Verify the information I provide before making any decisions.
+    `
     bottomDiv.appendChild(answer);
 
     var close = document.createElement('img');

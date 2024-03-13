@@ -728,22 +728,11 @@ function queryLlm(query, sendResponse) {
                                 let promises = []
 
                                 if (requiresReleaseHistory(query)) {
-                                    if (entities.project_names) {
-                                        entities.project_names.forEach(projectName => {
-                                            const promise = getProjectId(url.origin, space, projectName)
-                                                .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-                                                .then(response => response.text())
-                                                .catch(exception => console.log(exception))
-                                            promises.push(promise)
-                                        })
-                                    } else {
-                                        const promise = getProjectId(url.origin, space, projectName)
-                                            .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
-                                            .then(response => response.text())
-                                            .catch(exception => console.log(exception))
-                                        promises.push(promise)
-                                    }
+                                    promises.push(...getReleaseHistory(url, space, entities.project_names, projectName))
+                                }
 
+                                if (requiresReleaseLogs(query, entities.project_names)) {
+                                    promises.push(...getReleaseLogs(url, space, entities.project_names[0], "production", "latest"))
                                 }
 
                                 const promise = convertSpace(
@@ -825,8 +814,110 @@ function getProjectId(host, spaceId, projectName) {
         .catch(exception => console.log(exception))
 }
 
+function getEnvironmentId(host, spaceId, environmentName) {
+    return fetch(`${host}/api/${spaceId}/Environments?partialName=${encodeURIComponent(environmentName)}&take=10000`)
+        .then(response => response.json())
+        .then(json => {
+            const projects = json["Items"].filter(item => item["Name"].toLowerCase() === environmentName.toLowerCase())
+            if (projects.length === 1) {
+                return projects[0]["Id"]
+            } else if (projects.length > 1) {
+                const projectEntity = projects.filter(item => item["Name"] === environmentName).pop()
+                if (projectEntity) {
+                    return projectEntity["Id"]
+                }
+            }
+
+            return null
+        })
+        .catch(exception => console.log(exception))
+}
+
 function requiresReleaseHistory(query) {
     return query.toLowerCase().indexOf("deployment") !== -1 || query.toLowerCase().indexOf("release") !== -1
+}
+
+function getReleaseHistory(url, space, project_names, projectName) {
+    const promises = []
+    if (project_names) {
+        project_names.forEach(projectName => {
+            const promise = getProjectId(url.origin, space, projectName)
+                .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
+                .then(response => response.text())
+                .catch(exception => console.log(exception))
+            promises.push(promise)
+        })
+    } else {
+        const promise = getProjectId(url.origin, space, projectName)
+            .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
+            .then(response => response.text())
+            .catch(exception => console.log(exception))
+        promises.push(promise)
+    }
+    return promises
+}
+
+function requiresReleaseLogs(query, projectNames) {
+    if (!projectNames) {
+        return false
+    }
+    return query.toLowerCase().indexOf("log") !== -1
+}
+
+function getReleaseLogs(url, space, projectName, environmentName, release_version) {
+    const promises = []
+    const promise = getProjectId(url.origin, space, projectName)
+        .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
+        .then(response => response.json())
+        .then(progression => {
+            return getEnvironmentId(url.origin, space, environmentName)
+                .then(environmentId => {
+                    const releases = progression["Releases"].filter(release => Object.keys(release["Deployments"]).indexOf(environmentId) !== -1)
+
+                    if (!releases) {
+                        return []
+                    }
+
+                    return releases.map(release => release["Deployments"][environmentId]).flat()
+                })
+        })
+        .then(deployments => {
+            if (deployments.length === 0) {
+                return null
+            }
+
+            if (release_version.toLowerCase() === "latest") {
+                return deployments[0]["TaskId"]
+            }
+
+            const filtered = deployments.filter(release => release["ReleaseVersion"] === release_version)
+
+            if (filtered.length === 0) {
+                return null
+            }
+
+            return filtered[0]["TaskId"]
+        })
+        .then(taskId => {
+            if (taskId === null) {
+                return null
+            }
+
+            return fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`)
+        })
+        .then(response => response.json())
+        .then(task => task["ActivityLogs"].map(logs => getLogs(logs)).join("\n"))
+        .catch(exception => console.log(exception))
+    promises.push(promise)
+    return promises
+}
+
+function getLogs(logItem) {
+    let logs = logItem["LogElements"].map(element => element["MessageText"]).join("\n")
+    if (logItem["Children"]) {
+        logItem["Children"].forEach(child => logs += getLogs(child))
+    }
+    return logs
 }
 
 chrome.runtime.onMessage.addListener(

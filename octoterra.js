@@ -725,7 +725,28 @@ function queryLlm(query, sendResponse) {
                                 log(excludeAllProjectGroups)
                                 log(entities.projectgroup_names ? entities.projectgroup_names.join(",") : "")
 
-                                convertSpace(
+                                let promises = []
+
+                                if (requiresReleaseHistory(query)) {
+                                    if (entities.project_names) {
+                                        entities.project_names.forEach(projectName => {
+                                            const promise = getProjectId(url.origin, space, projectName)
+                                                .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
+                                                .then(response => response.text())
+                                                .catch(exception => console.log(exception))
+                                            promises.push(promise)
+                                        })
+                                    } else {
+                                        const promise = getProjectId(url.origin, space, projectName)
+                                            .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
+                                            .then(response => response.text())
+                                            .catch(exception => console.log(exception))
+                                        promises.push(promise)
+                                    }
+
+                                }
+
+                                const promise = convertSpace(
                                     url.origin,
                                     space,
                                     excludeAllProjects,
@@ -754,17 +775,21 @@ function queryLlm(query, sendResponse) {
                                     entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
                                     excludeAllTagSets,
                                     entities.tagset_names ? entities.tagset_names.join(",") : "",
-                                excludeAllProjectGroups,
+                                    excludeAllProjectGroups,
                                     entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
-                                ).then(hcl => {
+                                )
+                                promises.push(promise)
 
-                                    log("Space HCL")
-                                    log(hcl)
+                                Promise.all(promises).then(results => {
+                                    const context = results.join("\n")
+
+                                    log("Space Context")
+                                    log(context)
 
                                     fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
                                         {
                                             method: "POST",
-                                            body: hcl
+                                            body: context
                                         })
                                         .then(response => response.text())
                                         .then(answer => {
@@ -772,11 +797,36 @@ function queryLlm(query, sendResponse) {
                                         })
                                         .catch(error => sendResponse({answer: error}))
                                 })
+
                             })
                     })
             })
             .catch(error => sendResponse({answer: error}))
     })
+}
+
+
+function getProjectId(host, spaceId, projectName) {
+    return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
+        .then(response => response.json())
+        .then(json => {
+            const projects = json["Items"].filter(item => item["Name"].toLowerCase() === projectName.toLowerCase())
+            if (projects.length === 1) {
+                return projects[0]["Id"]
+            } else if (projects.length > 1) {
+                const projectEntity = projects.filter(item => item["Name"] === projectName).pop()
+                if (projectEntity) {
+                    return projectEntity["Id"]
+                }
+            }
+
+            return null
+        })
+        .catch(exception => console.log(exception))
+}
+
+function requiresReleaseHistory(query) {
+    return query.toLowerCase().indexOf("deployment") !== -1 || query.toLowerCase().indexOf("release") !== -1
 }
 
 chrome.runtime.onMessage.addListener(

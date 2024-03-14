@@ -163,6 +163,7 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
                 .then(response => {
                     clearThinking(answer, input, button, suggest, intervalId)
                     answer.value = response.answer
+                    answer.scrollTop = answer.scrollHeight;
                 })
         } catch {
             clearThinking(answer, input, button, intervalId)
@@ -239,8 +240,11 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // Create the option elements and add them to the select
     const options = [
         'Select a suggested query from the list',
-        `List anything interesting in the deployment logs for the "${message.project}" project in the "Production" environment`,
-        `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment`,
+        `List anything interesting in the deployment logs for the "${message.project}" project in the "Production" environment.`,
+        `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment.`,
+        `What does the "${message.project}" project do?`,
+        `What project variables are defined in the "${message.project}" project?`,
+        `List the project variables and the steps they are used in for the "${message.project}" project.`,
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

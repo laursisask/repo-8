@@ -725,54 +725,7 @@ function queryLlm(query, sendResponse) {
                                 log(excludeAllProjectGroups)
                                 log(entities.projectgroup_names ? entities.projectgroup_names.join(",") : "")
 
-                                let promises = []
-
-                                if (requiresReleaseHistory(query)) {
-                                    promises.push(...getReleaseHistory(url, space, entities.project_names, projectName))
-                                }
-
-                                if (requiresReleaseLogs(query, entities.project_names)) {
-                                    if (entities.environment_names)
-                                    {
-                                        promises.push(getReleaseLogs(url, space, entities.project_names[0], entities.environment_names[0], "latest"))
-                                    } else {
-                                        promises.push(getReleaseLogs(url, space, entities.project_names[0], null, "latest"))
-                                    }
-                                } else {
-                                    const promise = convertSpace(
-                                        url.origin,
-                                        space,
-                                        excludeAllProjects,
-                                        entities.project_names ? entities.project_names.join(",") : "",
-                                        excludeAllTargets,
-                                        entities.target_names ? entities.target_names.join(",") : "",
-                                        excludeAllRunbooks,
-                                        entities.runbook_names ? entities.runbook_names.join(",") : "",
-                                        excludeAllVariableSets,
-                                        entities.library_variable_sets ? entities.library_variable_sets.join(",") : "",
-                                        excludeAllTenants,
-                                        entities.tenant_names ? entities.tenant_names.join(",") : "",
-                                        excludeAllEnvironments,
-                                        entities.environment_names ? entities.environment_names.join(",") : "",
-                                        excludeAllFeeds,
-                                        entities.feed_names ? entities.feed_names.join(",") : "",
-                                        excludeAllAccounts,
-                                        entities.account_names ? entities.account_names.join(",") : "",
-                                        excludeAllCertificates,
-                                        entities.certificate_names ? entities.certificate_names.join(",") : "",
-                                        excludeAllLifecycles,
-                                        entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
-                                        excludeAllWorkerpools,
-                                        entities.workerpool_names ? entities.workerpool_names.join(",") : "",
-                                        excludeAllMachinePolicies,
-                                        entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
-                                        excludeAllTagSets,
-                                        entities.tagset_names ? entities.tagset_names.join(",") : "",
-                                        excludeAllProjectGroups,
-                                        entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
-                                    )
-                                    promises.push(promise)
-                                }
+                                const promises = getContext(url, space, entities, query)
 
                                 Promise.all(promises).then(results => {
                                     const context = results.join("\n\n")
@@ -799,6 +752,58 @@ function queryLlm(query, sendResponse) {
     })
 }
 
+
+function getContext(url, space, entities, query) {
+    let promises = []
+
+    if (requiresReleaseHistory(query)) {
+        promises.push(...getReleaseHistory(url, space, entities.project_names))
+    }
+
+    if (requiresReleaseLogs(query, entities.project_names)) {
+        if (entities.environment_names)
+        {
+            promises.push(getReleaseLogs(url, space, entities.project_names[0], entities.environment_names[0], "latest"))
+        } else {
+            promises.push(getReleaseLogs(url, space, entities.project_names[0], null, "latest"))
+        }
+    } else {
+        const promise = convertSpace(
+            url.origin,
+            space,
+            excludeAllProjects,
+            entities.project_names ? entities.project_names.join(",") : "",
+            excludeAllTargets,
+            entities.target_names ? entities.target_names.join(",") : "",
+            excludeAllRunbooks,
+            entities.runbook_names ? entities.runbook_names.join(",") : "",
+            excludeAllVariableSets,
+            entities.library_variable_sets ? entities.library_variable_sets.join(",") : "",
+            excludeAllTenants,
+            entities.tenant_names ? entities.tenant_names.join(",") : "",
+            excludeAllEnvironments,
+            entities.environment_names ? entities.environment_names.join(",") : "",
+            excludeAllFeeds,
+            entities.feed_names ? entities.feed_names.join(",") : "",
+            excludeAllAccounts,
+            entities.account_names ? entities.account_names.join(",") : "",
+            excludeAllCertificates,
+            entities.certificate_names ? entities.certificate_names.join(",") : "",
+            excludeAllLifecycles,
+            entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
+            excludeAllWorkerpools,
+            entities.workerpool_names ? entities.workerpool_names.join(",") : "",
+            excludeAllMachinePolicies,
+            entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
+            excludeAllTagSets,
+            entities.tagset_names ? entities.tagset_names.join(",") : "",
+            excludeAllProjectGroups,
+            entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
+        )
+        promises.push(promise)
+    }
+    return promises
+}
 
 function getProjectId(host, spaceId, projectName) {
     return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
@@ -842,7 +847,7 @@ function requiresReleaseHistory(query) {
     return query.toLowerCase().indexOf("deployment") !== -1 || query.toLowerCase().indexOf("release") !== -1
 }
 
-function getReleaseHistory(url, space, project_names, projectName) {
+function getReleaseHistory(url, space, project_names) {
     const promises = []
     if (project_names) {
         project_names.forEach(projectName => {

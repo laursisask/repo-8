@@ -732,42 +732,47 @@ function queryLlm(query, sendResponse) {
                                 }
 
                                 if (requiresReleaseLogs(query, entities.project_names)) {
-                                    promises.push(...getReleaseLogs(url, space, entities.project_names[0], "production", "latest"))
+                                    if (entities.environment_names)
+                                    {
+                                        promises.push(getReleaseLogs(url, space, entities.project_names[0], entities.environment_names[0], "latest"))
+                                    } else {
+                                        promises.push(getReleaseLogs(url, space, entities.project_names[0], null, "latest"))
+                                    }
+                                } else {
+                                    const promise = convertSpace(
+                                        url.origin,
+                                        space,
+                                        excludeAllProjects,
+                                        entities.project_names ? entities.project_names.join(",") : "",
+                                        excludeAllTargets,
+                                        entities.target_names ? entities.target_names.join(",") : "",
+                                        excludeAllRunbooks,
+                                        entities.runbook_names ? entities.runbook_names.join(",") : "",
+                                        excludeAllVariableSets,
+                                        entities.library_variable_sets ? entities.library_variable_sets.join(",") : "",
+                                        excludeAllTenants,
+                                        entities.tenant_names ? entities.tenant_names.join(",") : "",
+                                        excludeAllEnvironments,
+                                        entities.environment_names ? entities.environment_names.join(",") : "",
+                                        excludeAllFeeds,
+                                        entities.feed_names ? entities.feed_names.join(",") : "",
+                                        excludeAllAccounts,
+                                        entities.account_names ? entities.account_names.join(",") : "",
+                                        excludeAllCertificates,
+                                        entities.certificate_names ? entities.certificate_names.join(",") : "",
+                                        excludeAllLifecycles,
+                                        entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
+                                        excludeAllWorkerpools,
+                                        entities.workerpool_names ? entities.workerpool_names.join(",") : "",
+                                        excludeAllMachinePolicies,
+                                        entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
+                                        excludeAllTagSets,
+                                        entities.tagset_names ? entities.tagset_names.join(",") : "",
+                                        excludeAllProjectGroups,
+                                        entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
+                                    )
+                                    promises.push(promise)
                                 }
-
-                                const promise = convertSpace(
-                                    url.origin,
-                                    space,
-                                    excludeAllProjects,
-                                    entities.project_names ? entities.project_names.join(",") : "",
-                                    excludeAllTargets,
-                                    entities.target_names ? entities.target_names.join(",") : "",
-                                    excludeAllRunbooks,
-                                    entities.runbook_names ? entities.runbook_names.join(",") : "",
-                                    excludeAllVariableSets,
-                                    entities.library_variable_sets ? entities.library_variable_sets.join(",") : "",
-                                    excludeAllTenants,
-                                    entities.tenant_names ? entities.tenant_names.join(",") : "",
-                                    excludeAllEnvironments,
-                                    entities.environment_names ? entities.environment_names.join(",") : "",
-                                    excludeAllFeeds,
-                                    entities.feed_names ? entities.feed_names.join(",") : "",
-                                    excludeAllAccounts,
-                                    entities.account_names ? entities.account_names.join(",") : "",
-                                    excludeAllCertificates,
-                                    entities.certificate_names ? entities.certificate_names.join(",") : "",
-                                    excludeAllLifecycles,
-                                    entities.lifecycle_names ? entities.lifecycle_names.join(",") : "",
-                                    excludeAllWorkerpools,
-                                    entities.workerpool_names ? entities.workerpool_names.join(",") : "",
-                                    excludeAllMachinePolicies,
-                                    entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "",
-                                    excludeAllTagSets,
-                                    entities.tagset_names ? entities.tagset_names.join(",") : "",
-                                    excludeAllProjectGroups,
-                                    entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
-                                )
-                                promises.push(promise)
 
                                 Promise.all(promises).then(results => {
                                     const context = results.join("\n\n")
@@ -865,21 +870,30 @@ function requiresReleaseLogs(query, projectNames) {
 }
 
 function getReleaseLogs(url, space, projectName, environmentName, release_version) {
-    const promises = []
-    const promise = getProjectId(url.origin, space, projectName)
+    return getProjectId(url.origin, space, projectName)
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
         .then(response => response.json())
         .then(progression => {
-            return getEnvironmentId(url.origin, space, environmentName)
-                .then(environmentId => {
-                    const releases = progression["Releases"].filter(release => Object.keys(release["Deployments"]).indexOf(environmentId) !== -1)
+            if (!progression["Releases"]) {
+                return []
+            }
 
-                    if (!releases) {
-                        return []
-                    }
+            // If an environment was mentioned, limit the deployments to the target environment
+            if (environmentName) {
+                return getEnvironmentId(url.origin, space, environmentName)
+                    .then(environmentId => {
+                        const releases = progression["Releases"].filter(release => Object.keys(release["Deployments"]).indexOf(environmentId) !== -1)
 
-                    return releases.map(release => release["Deployments"][environmentId]).flat()
-                })
+                        if (!releases) {
+                            return []
+                        }
+
+                        return releases.map(release => release["Deployments"][environmentId]).flat()
+                    })
+            }
+
+            // If no environment was specified, every deployment is a candidate
+            return progression["Releases"].map(release => Object.values(release["Deployments"]).flat()).flat()
         })
         .then(deployments => {
             if (deployments.length === 0) {
@@ -908,14 +922,12 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         .then(response => response.json())
         .then(task => task["ActivityLogs"].map(logs => getLogs(logs)).join("\n"))
         .catch(exception => console.log(exception))
-    promises.push(promise)
-    return promises
 }
 
 function getLogs(logItem) {
     let logs = logItem["LogElements"].map(element => element["MessageText"]).join("\n")
     if (logItem["Children"]) {
-        logItem["Children"].forEach(child => logs += getLogs(child))
+        logItem["Children"].forEach(child => logs += "\n" + getLogs(child))
     }
     return logs
 }

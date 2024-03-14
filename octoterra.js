@@ -927,6 +927,26 @@ function getLogs(logItem, depth) {
     return logs
 }
 
+function getProjectName() {
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+        try {
+            const url = new URL(tabs[0].url)
+            const urlSplit = tabs[0].url.split("/")
+
+            if (urlSplit.length >= 7 && urlSplit[5] === "projects") {
+                const space = urlSplit[4]
+                const projectSlug = urlSplit[6]
+
+                fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
+                    .then(response => response.json())
+                    .then(project => chrome.tabs.sendMessage(tabs[0].id, {project: project["Name"]}))
+            }
+        } catch {
+            // probably an invalid URL
+        }
+    })
+}
+
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         queryLlm(request.query, sendResponse)
@@ -935,17 +955,23 @@ chrome.runtime.onMessage.addListener(
 );
 
 chrome.action.onClicked.addListener((tab) => {
-    const url = new URL(tab.url)
-    console.log(url.origin)
-    if (url.origin.match(/https:\/\/.+?\.octopus\.app/)) {
-        chrome.scripting.executeScript({
-            target: {tabId: tab.id},
-            files: ['content.js']
-        });
-    } else {
-        chrome.scripting.executeScript({
-            target: {tabId: tab.id},
-            files: ['alert_error.js']
-        });
+    try {
+        const url = new URL(tab.url)
+        console.log(url.origin)
+        if (url.origin.match(/https:\/\/.+?\.octopus\.app/)) {
+            chrome.scripting.executeScript({
+                target: {tabId: tab.id},
+                files: ['content.js']
+            });
+            getProjectName()
+        } else {
+            chrome.scripting.executeScript({
+                target: {tabId: tab.id},
+                files: ['alert_error.js']
+            });
+        }
+    } catch {
+        // probably an invalid URL
     }
 });
+

@@ -222,3 +222,27 @@ if (!overlayExists()) {
 } else {
     destroyOverlay()
 }
+
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    const suggestions = document.getElementById('suggestions');
+
+    if (!suggestions) {
+        return
+    }
+
+    while (suggestions.firstChild) {
+        suggestions.removeChild(suggestions.firstChild);
+    }
+
+    // Create the option elements and add them to the select
+    const options = [
+        'Select a suggested query from the list',
+        `List anything interesting in the deployment logs for the "${message.project}" project in the "environment name" environment`
+    ]
+    for (let i = 0; i < options.length; i++) {
+        const option = document.createElement('option');
+        option.setAttribute('value', options[i]);
+        option.textContent = options[i];
+        suggestions.appendChild(option);
+    }
+});

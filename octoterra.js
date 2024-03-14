@@ -665,69 +665,6 @@ function queryLlm(query, sendResponse) {
                 log(JSON.stringify(url.origin))
                 log(JSON.stringify(space))
 
-                const excludeAllProjects = is_empty_array(entities.project_names) &&
-                    query.toLowerCase().indexOf("project") === -1
-                const excludeAllTargets = is_empty_array(entities.target_names) &&
-                    query.toLowerCase().indexOf("target") === -1
-                const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
-                    query.toLowerCase().indexOf("runbook") === -1
-                const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
-                    query.toLowerCase().indexOf("library variable set") === -1
-                const excludeAllTenants = is_empty_array(entities.tenant_names) &&
-                    query.toLowerCase().indexOf("tenant") === -1
-                const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
-                    query.toLowerCase().indexOf("environment") === -1
-                const excludeAllFeeds = is_empty_array(entities.feed_names) &&
-                    query.toLowerCase().indexOf("feed") === -1
-                const excludeAllAccounts = is_empty_array(entities.account_names) &&
-                    query.toLowerCase().indexOf("account") === -1
-                const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
-                    query.toLowerCase().indexOf("certificate") === -1
-                const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
-                    query.toLowerCase().indexOf("lifecycle") === -1
-                const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
-                    query.toLowerCase().indexOf("pool") === -1
-                const excludeAllMachinePolicies = is_empty_array(entities.machinepolicy_names) &&
-                    query.toLowerCase().indexOf("policy") === -1
-                const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
-                    query.toLowerCase().indexOf("tag") === -1
-                const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
-                    query.toLowerCase().indexOf("project group") === -1
-
-                log("Arguments")
-                log("URL: " + url.origin)
-                log("Space: " + space)
-                log("Exclude All Projects: " + excludeAllProjects)
-                log("Project Names: " + (entities.project_names ? entities.project_names.join(",") : ""))
-                log("Exclude All Targets: " + excludeAllTargets)
-                log("Targets: " + (entities.target_names ? entities.target_names.join(",") : ""))
-                log("Exclude All Runbooks: " + excludeAllRunbooks)
-                log("Runbook Names: " + (entities.runbook_names ? entities.runbook_names.join(",") : ""))
-                log("Exclude All Variable Sets: " + excludeAllVariableSets)
-                log("Variable Sets: " + (entities.library_variable_sets ? entities.library_variable_sets.join(",") : ""))
-                log("Exclude All Tenants: " + excludeAllTenants)
-                log("Tenants: " + (entities.tenant_names ? entities.tenant_names.join(",") : ""))
-                log("Exclude All Environments: " + excludeAllEnvironments)
-                log("Environments: " + (entities.environment_names ? entities.environment_names.join(",") : ""))
-                log("Exclude All Feeds: " + excludeAllFeeds)
-                log("Feeds: " + (entities.feed_names ? entities.feed_names.join(",") : ""))
-                log("Exclude All Accounts: " + excludeAllAccounts)
-                log("Accounts: " + (entities.account_names ? entities.account_names.join(",") : ""))
-                log("Exclude All Certificates: " + excludeAllCertificates)
-                log("Certificates: " + (entities.certificate_names ? entities.certificate_names.join(",") : ""))
-                log("Exclude All Lifecycles: " + excludeAllLifecycles)
-                log("Lifecycles: " + (entities.lifecycle_names ? entities.lifecycle_names.join(",") : ""))
-                log("Exclude All Worker Pools: " + excludeAllWorkerpools)
-                log("Worker Pools: " + (entities.workerpool_names ? entities.workerpool_names.join(",") : ""))
-                log("Exclude All Machine Policies: " + excludeAllMachinePolicies)
-                log("Machine Policies: " + (entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : ""))
-                log("Exclude All Tag Sets: " + excludeAllTagSets)
-                log("Tag Sets: " + (entities.tagset_names ? entities.tagset_names.join(",") : ""))
-                log("Exclude All Project Groups: " + excludeAllProjectGroups)
-                log("Project Groups: " + (entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""))
-                log("Channels: " + (entities.channel_names ? entities.channel_names.join(",") : ""))
-                log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
-
                 const promises = getContext(url, space, entities, query)
 
                 return Promise.all(promises)
@@ -746,7 +683,9 @@ function queryLlm(query, sendResponse) {
             })
             .then(response => response.text())
             .then(answer => sendResponse({answer: answer}))
-            .catch(error => sendResponse({answer: error}))
+            .catch(error => {
+                sendResponse({answer: error.toString()})
+            })
     })
 }
 
@@ -763,6 +702,69 @@ function getContext(url, space, entities, query) {
         const releaseVersion =  entities.release_versions ? entities.release_versions[0] : null
         promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, releaseVersion))
     } else {
+        const excludeAllProjects = is_empty_array(entities.project_names) &&
+            query.toLowerCase().indexOf("project") === -1
+        const excludeAllTargets = is_empty_array(entities.target_names) &&
+            query.toLowerCase().indexOf("target") === -1
+        const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
+            query.toLowerCase().indexOf("runbook") === -1
+        const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
+            query.toLowerCase().indexOf("library variable set") === -1
+        const excludeAllTenants = is_empty_array(entities.tenant_names) &&
+            query.toLowerCase().indexOf("tenant") === -1
+        const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
+            query.toLowerCase().indexOf("environment") === -1
+        const excludeAllFeeds = is_empty_array(entities.feed_names) &&
+            query.toLowerCase().indexOf("feed") === -1
+        const excludeAllAccounts = is_empty_array(entities.account_names) &&
+            query.toLowerCase().indexOf("account") === -1
+        const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
+            query.toLowerCase().indexOf("certificate") === -1
+        const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
+            query.toLowerCase().indexOf("lifecycle") === -1
+        const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
+            query.toLowerCase().indexOf("pool") === -1
+        const excludeAllMachinePolicies = is_empty_array(entities.machinepolicy_names) &&
+            query.toLowerCase().indexOf("policy") === -1
+        const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
+            query.toLowerCase().indexOf("tag") === -1
+        const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
+            query.toLowerCase().indexOf("project group") === -1
+
+        log("Arguments")
+        log("URL: " + url.origin)
+        log("Space: " + space)
+        log("Exclude All Projects: " + excludeAllProjects)
+        log("Project Names: " + (entities.project_names ? entities.project_names.join(",") : ""))
+        log("Exclude All Targets: " + excludeAllTargets)
+        log("Targets: " + (entities.target_names ? entities.target_names.join(",") : ""))
+        log("Exclude All Runbooks: " + excludeAllRunbooks)
+        log("Runbook Names: " + (entities.runbook_names ? entities.runbook_names.join(",") : ""))
+        log("Exclude All Variable Sets: " + excludeAllVariableSets)
+        log("Variable Sets: " + (entities.library_variable_sets ? entities.library_variable_sets.join(",") : ""))
+        log("Exclude All Tenants: " + excludeAllTenants)
+        log("Tenants: " + (entities.tenant_names ? entities.tenant_names.join(",") : ""))
+        log("Exclude All Environments: " + excludeAllEnvironments)
+        log("Environments: " + (entities.environment_names ? entities.environment_names.join(",") : ""))
+        log("Exclude All Feeds: " + excludeAllFeeds)
+        log("Feeds: " + (entities.feed_names ? entities.feed_names.join(",") : ""))
+        log("Exclude All Accounts: " + excludeAllAccounts)
+        log("Accounts: " + (entities.account_names ? entities.account_names.join(",") : ""))
+        log("Exclude All Certificates: " + excludeAllCertificates)
+        log("Certificates: " + (entities.certificate_names ? entities.certificate_names.join(",") : ""))
+        log("Exclude All Lifecycles: " + excludeAllLifecycles)
+        log("Lifecycles: " + (entities.lifecycle_names ? entities.lifecycle_names.join(",") : ""))
+        log("Exclude All Worker Pools: " + excludeAllWorkerpools)
+        log("Worker Pools: " + (entities.workerpool_names ? entities.workerpool_names.join(",") : ""))
+        log("Exclude All Machine Policies: " + excludeAllMachinePolicies)
+        log("Machine Policies: " + (entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : ""))
+        log("Exclude All Tag Sets: " + excludeAllTagSets)
+        log("Tag Sets: " + (entities.tagset_names ? entities.tagset_names.join(",") : ""))
+        log("Exclude All Project Groups: " + excludeAllProjectGroups)
+        log("Project Groups: " + (entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""))
+        log("Channels: " + (entities.channel_names ? entities.channel_names.join(",") : ""))
+        log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
+
         const promise = convertSpace(
             url.origin,
             space,
@@ -898,7 +900,7 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
                 throw "No task found for deployment"
             }
 
-            if (release_version.toLowerCase() === "latest") {
+            if (!release_version || release_version.toLowerCase() === "latest") {
                 return deployments[0]["TaskId"]
             }
 

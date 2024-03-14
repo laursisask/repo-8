@@ -157,10 +157,11 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
         try {
             input.disabled = true
             button.disabled = true
+            suggest.disabled = true
             chrome.runtime
                 .sendMessage({query: input.value})
                 .then(response => {
-                    clearThinking(answer, input, button, intervalId)
+                    clearThinking(answer, input, button, suggest, intervalId)
                     answer.value = response.answer
                 })
         } catch {
@@ -195,11 +196,12 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
     }
 }
 
-function clearThinking(answer, input, button, intervalId) {
+function clearThinking(answer, input, button, suggest, intervalId) {
     clearInterval(intervalId);
     answer.value = ""
     input.disabled = false
     button.disabled = false
+    suggest.disabled = false
 }
 
 function setThinking() {
@@ -237,7 +239,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // Create the option elements and add them to the select
     const options = [
         'Select a suggested query from the list',
-        `List anything interesting in the deployment logs for the "${message.project}" project in the "environment name" environment`
+        `List anything interesting in the deployment logs for the "${message.project}" project in the "Production" environment`,
+        `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment`,
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

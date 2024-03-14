@@ -895,7 +895,7 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         })
         .then(deployments => {
             if (deployments.length === 0) {
-                return null
+                throw "No task found for deployment"
             }
 
             if (release_version.toLowerCase() === "latest") {
@@ -905,18 +905,12 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
             const filtered = deployments.filter(release => release["ReleaseVersion"] === release_version)
 
             if (filtered.length === 0) {
-                return null
+                throw "No task found for deployment"
             }
 
             return filtered[0]["TaskId"]
         })
-        .then(taskId => {
-            if (taskId === null) {
-                throw "No task found for deployment"
-            }
-
-            return fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`)
-        })
+        .then(taskId => fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`))
         .then(response => response.json())
         .then(task => task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n"))
 }

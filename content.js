@@ -51,26 +51,66 @@ function createOverlay() {
     bottomDiv.style.paddingRight = '10%';
     overlay.appendChild(bottomDiv);
 
-    var queryHeading = document.createElement('h2');
+    const queryHeading = document.createElement('h2');
     queryHeading.innerText = 'Query';
     topDiv.appendChild(queryHeading);
 
-    const input = document.createElement('textarea');
+    // query div
+    const queryDiv = document.createElement('div');
+    queryDiv.style.width = '100%';
+    topDiv.appendChild(queryDiv);
+
+    // Create the input element
+    const input = document.createElement('input');
     input.id = "input"
-    input.style.width = '100%';
+    input.style.width = "calc(100% - 50px)"
+    input.size = 100
+    input.autocomplete = 'off';
     input.style.fontSize = '20px';
-    input.value = "What project variables are in the project Octopus Copilot Function?"
     input.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     input.style.borderRadius = '5px'
-    topDiv.appendChild(input)
+    input.style.marginBottom = '5px'
+    input.setAttribute('id', 'list');
+    queryDiv.appendChild(input);
+
+    // Create the suggestion button
+    const suggest = document.createElement('button');
+    suggest.innerText = '?';
+    suggest.style.fontSize = '20px';
+    suggest.style.width = '50px';
+    queryDiv.appendChild(suggest);
+
+    // Create the select element
+    const select = document.createElement('select');
+    select.setAttribute('id', 'suggestions');
+    select.style.display = 'none';
+    select.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
+    select.style.borderRadius = '5px'
+    select.style.width = '100%';
+    select.style.fontSize = '20px';
+
+    // Create the option elements and add them to the select
+    const options = [
+        'Select a suggested query from the list',
+        'List anything interesting in the deployment logs for the "project name" project in the "environment name" environment'
+    ];
+    for (let i = 0; i < options.length; i++) {
+        const option = document.createElement('option');
+        option.setAttribute('value', options[i]);
+        option.textContent = options[i];
+        select.appendChild(option);
+    }
+
+    // Add the select element to the document body
+    topDiv.appendChild(select);
 
     // Create a new button element
-    var button = document.createElement('button');
+    const button = document.createElement('button');
     button.innerText = 'Submit';
     button.style.fontSize = '20px';
     topDiv.appendChild(button);
 
-    var answerHeading = document.createElement('h2');
+    const answerHeading = document.createElement('h2');
     answerHeading.innerText = 'Answer';
     bottomDiv.appendChild(answerHeading);
 
@@ -136,6 +176,22 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
             event.preventDefault()
             return false
         }
+    }
+
+    select.addEventListener('change', function() {
+        input.value = this.value
+        this.value = 'Select a suggested query from the list'
+        select.style.display = 'none'
+        button.style.display = 'block'
+        input.style.display = 'inline-block'
+        suggest.style.display = 'inline-block'
+    });
+
+    suggest.onclick = function () {
+        select.style.display = 'block'
+        button.style.display = 'none'
+        input.style.display = 'none'
+        suggest.style.display = 'none'
     }
 }
 

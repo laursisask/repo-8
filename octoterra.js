@@ -920,19 +920,17 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
             return fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`)
         })
         .then(response => response.json())
-        .then(task => {
-            task["ActivityLogs"].map(logs => getLogs(logs)).join("\n")
-        })
+        .then(task => task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n"))
 }
 
-function getLogs(logItem) {
-    if (!logItem["LogElements"] && !logItem["Children"]) {
+function getLogs(logItem, depth) {
+    if (depth === 0 && logItem["LogElements"].length === 0 && logItem["Children"].length === 0) {
         return "No logs found (status: " + logItem["Status"] + ")."
     }
 
     let logs = logItem["LogElements"].map(element => element["MessageText"]).join("\n")
     if (logItem["Children"]) {
-        logItem["Children"].forEach(child => logs += "\n" + getLogs(child))
+        logItem["Children"].forEach(child => logs += "\n" + getLogs(child, depth + 1))
     }
     return logs
 }

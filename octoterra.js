@@ -802,6 +802,20 @@ function getContext(url, space, entities, query) {
     return promises
 }
 
+function stripLinks(resource) {
+    if (resource["Links"])  {
+        delete resource["Links"]
+    }
+
+    Object.keys(resource).forEach(key => {
+        if (typeof resource[key] === 'object' && resource[key] !== null) {
+            stripLinks(resource[key])
+        }
+    })
+
+    return resource
+}
+
 function getProjectId(host, spaceId, projectName) {
     return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
         .then(response => response.json())
@@ -849,14 +863,18 @@ function getReleaseHistory(url, space, project_names) {
         project_names.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-                .then(response => response.text())
+                .then(response => response.json())
+                .then(release => stripLinks(release))
+                .then(release => JSON.stringify(release))
             promises.push(promise)
         })
     } else {
         // Look at the dashboard for a global view
         const promise = getProjectId(url.origin, space, projectName)
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
-            .then(response => response.text())
+            .then(response => response.json())
+            .then(release => stripLinks(release))
+            .then(release => JSON.stringify(release))
         promises.push(promise)
     }
     return promises

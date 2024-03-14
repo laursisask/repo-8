@@ -646,110 +646,106 @@ function queryLlm(query, sendResponse) {
         const url = new URL(tabs[0].url)
         const space = tabs[0].url.split("/")[4]
 
-        fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-            .then(response => response.json())
-            .then(entities => {
-                log("Extracted entities")
-                log(JSON.stringify(entities, null, 4))
+        const promises = [
+            fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
+                .then(response => response.json()),
+            fetch("convert_project.wasm")
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
+        ]
 
-                //fetch("https://github.com/OctopusSolutionsEngineering/OctopusTerraformExport/raw/main/wasm/convert_project.wasm")
-                fetch("convert_project.wasm")
-                    .then(response => response.arrayBuffer())
-                    .then(arrayBuffer => {
-                        WebAssembly.instantiate(arrayBuffer, go.importObject)
-                            .then(result => {
-                                go.run(result.instance);
+        Promise.all(promises)
+            .then(results => {
+                const entities = results[0]
+                const wasm = results[1]
 
-                                log("URL and space")
-                                log(JSON.stringify(url.origin))
-                                log(JSON.stringify(space))
+                go.run(wasm.instance);
 
-                                const excludeAllProjects = is_empty_array(entities.project_names) &&
-                                    query.toLowerCase().indexOf("project") === -1
-                                const excludeAllTargets = is_empty_array(entities.target_names) &&
-                                    query.toLowerCase().indexOf("target") === -1
-                                const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
-                                    query.toLowerCase().indexOf("runbook") === -1
-                                const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
-                                    query.toLowerCase().indexOf("library variable set") === -1
-                                const excludeAllTenants = is_empty_array(entities.tenant_names) &&
-                                    query.toLowerCase().indexOf("tenant") === -1
-                                const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
-                                    query.toLowerCase().indexOf("environment") === -1
-                                const excludeAllFeeds = is_empty_array(entities.feed_names) &&
-                                    query.toLowerCase().indexOf("feed") === -1
-                                const excludeAllAccounts = is_empty_array(entities.account_names) &&
-                                    query.toLowerCase().indexOf("account") === -1
-                                const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
-                                    query.toLowerCase().indexOf("certificate") === -1
-                                const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
-                                    query.toLowerCase().indexOf("lifecycle") === -1
-                                const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
-                                    query.toLowerCase().indexOf("pool") === -1
-                                const excludeAllMachinePolicies = is_empty_array(entities.machinepolicy_names) &&
-                                    query.toLowerCase().indexOf("policy") === -1
-                                const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
-                                    query.toLowerCase().indexOf("tag") === -1
-                                const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
-                                    query.toLowerCase().indexOf("project group") === -1
+                log("URL and space")
+                log(JSON.stringify(url.origin))
+                log(JSON.stringify(space))
 
-                                log("Arguments")
-                                log("URL: " + url.origin)
-                                log("Space: " + space)
-                                log("Exclude All Projects: " + excludeAllProjects)
-                                log("Project Names: " + entities.project_names ? entities.project_names.join(",") : "")
-                                log("Exclude All Targets: " + excludeAllTargets)
-                                log("Targets: " + entities.target_names ? entities.target_names.join(",") : "")
-                                log("Exclude All Runbooks: " + excludeAllRunbooks)
-                                log("Runbook Names: " + entities.runbook_names ? entities.runbook_names.join(",") : "")
-                                log("Exclude All Variable Sets: " + excludeAllVariableSets)
-                                log("Variable Sets: " + entities.library_variable_sets ? entities.library_variable_sets.join(",") : "")
-                                log("Exclude All Tenants: " + excludeAllTenants)
-                                log("Tenants: " + entities.tenant_names ? entities.tenant_names.join(",") : "")
-                                log("Exclude All Environments: " + excludeAllEnvironments)
-                                log("Environments: " + entities.environment_names ? entities.environment_names.join(",") : "")
-                                log("Exclude All Feeds: " + excludeAllFeeds)
-                                log("Feeds: " + entities.feed_names ? entities.feed_names.join(",") : "")
-                                log("Exclude All Accounts: " + excludeAllAccounts)
-                                log("Accounts: " + entities.account_names ? entities.account_names.join(",") : "")
-                                log("Exclude All Certificates: " + excludeAllCertificates)
-                                log("Certificates: " + entities.certificate_names ? entities.certificate_names.join(",") : "")
-                                log("Exclude All Lifecycles: " + excludeAllLifecycles)
-                                log("Lifecycles: " + entities.lifecycle_names ? entities.lifecycle_names.join(",") : "")
-                                log("Exclude All Worker Pools: " + excludeAllWorkerpools)
-                                log("Worker Pools: " + entities.workerpool_names ? entities.workerpool_names.join(",") : "")
-                                log("Exclude All Machine Policies: " + excludeAllMachinePolicies)
-                                log("Machine Policies: " + entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : "")
-                                log("Exclude All Tag Sets: " + excludeAllTagSets)
-                                log("Tag Sets: " + entities.tagset_names ? entities.tagset_names.join(",") : "")
-                                log("Exclude All Project Groups: " + excludeAllProjectGroups)
-                                log("Project Groups: " + entities.projectgroup_names ? entities.projectgroup_names.join(",") : "")
-                                log("Channels: " + entities.channel_names ? entities.channel_names.join(",") : "")
-                                log("Release Versions: " + entities.release_versions ? entities.release_versions.join(",") : "")
+                const excludeAllProjects = is_empty_array(entities.project_names) &&
+                    query.toLowerCase().indexOf("project") === -1
+                const excludeAllTargets = is_empty_array(entities.target_names) &&
+                    query.toLowerCase().indexOf("target") === -1
+                const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
+                    query.toLowerCase().indexOf("runbook") === -1
+                const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
+                    query.toLowerCase().indexOf("library variable set") === -1
+                const excludeAllTenants = is_empty_array(entities.tenant_names) &&
+                    query.toLowerCase().indexOf("tenant") === -1
+                const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
+                    query.toLowerCase().indexOf("environment") === -1
+                const excludeAllFeeds = is_empty_array(entities.feed_names) &&
+                    query.toLowerCase().indexOf("feed") === -1
+                const excludeAllAccounts = is_empty_array(entities.account_names) &&
+                    query.toLowerCase().indexOf("account") === -1
+                const excludeAllCertificates = is_empty_array(entities.certificate_names) &&
+                    query.toLowerCase().indexOf("certificate") === -1
+                const excludeAllLifecycles = is_empty_array(entities.lifecycle_names) &&
+                    query.toLowerCase().indexOf("lifecycle") === -1
+                const excludeAllWorkerpools = is_empty_array(entities.workerpool_names) &&
+                    query.toLowerCase().indexOf("pool") === -1
+                const excludeAllMachinePolicies = is_empty_array(entities.machinepolicy_names) &&
+                    query.toLowerCase().indexOf("policy") === -1
+                const excludeAllTagSets = is_empty_array(entities.tagset_names) &&
+                    query.toLowerCase().indexOf("tag") === -1
+                const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
+                    query.toLowerCase().indexOf("project group") === -1
 
-                                const promises = getContext(url, space, entities, query)
+                log("Arguments")
+                log("URL: " + url.origin)
+                log("Space: " + space)
+                log("Exclude All Projects: " + excludeAllProjects)
+                log("Project Names: " + (entities.project_names ? entities.project_names.join(",") : ""))
+                log("Exclude All Targets: " + excludeAllTargets)
+                log("Targets: " + (entities.target_names ? entities.target_names.join(",") : ""))
+                log("Exclude All Runbooks: " + excludeAllRunbooks)
+                log("Runbook Names: " + (entities.runbook_names ? entities.runbook_names.join(",") : ""))
+                log("Exclude All Variable Sets: " + excludeAllVariableSets)
+                log("Variable Sets: " + (entities.library_variable_sets ? entities.library_variable_sets.join(",") : ""))
+                log("Exclude All Tenants: " + excludeAllTenants)
+                log("Tenants: " + (entities.tenant_names ? entities.tenant_names.join(",") : ""))
+                log("Exclude All Environments: " + excludeAllEnvironments)
+                log("Environments: " + (entities.environment_names ? entities.environment_names.join(",") : ""))
+                log("Exclude All Feeds: " + excludeAllFeeds)
+                log("Feeds: " + (entities.feed_names ? entities.feed_names.join(",") : ""))
+                log("Exclude All Accounts: " + excludeAllAccounts)
+                log("Accounts: " + (entities.account_names ? entities.account_names.join(",") : ""))
+                log("Exclude All Certificates: " + excludeAllCertificates)
+                log("Certificates: " + (entities.certificate_names ? entities.certificate_names.join(",") : ""))
+                log("Exclude All Lifecycles: " + excludeAllLifecycles)
+                log("Lifecycles: " + (entities.lifecycle_names ? entities.lifecycle_names.join(",") : ""))
+                log("Exclude All Worker Pools: " + excludeAllWorkerpools)
+                log("Worker Pools: " + (entities.workerpool_names ? entities.workerpool_names.join(",") : ""))
+                log("Exclude All Machine Policies: " + excludeAllMachinePolicies)
+                log("Machine Policies: " + (entities.machinepolicy_names ? entities.machinepolicy_names.join(",") : ""))
+                log("Exclude All Tag Sets: " + excludeAllTagSets)
+                log("Tag Sets: " + (entities.tagset_names ? entities.tagset_names.join(",") : ""))
+                log("Exclude All Project Groups: " + excludeAllProjectGroups)
+                log("Project Groups: " + (entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""))
+                log("Channels: " + (entities.channel_names ? entities.channel_names.join(",") : ""))
+                log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
 
-                                Promise.all(promises).then(results => {
-                                    const context = results.join("\n\n")
+                const promises = getContext(url, space, entities, query)
 
-                                    log("Space Context")
-                                    log(context)
+                return Promise.all(promises)
+            })
+            .then(results => {
+                const context = results.join("\n\n")
 
-                                    fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
-                                        {
-                                            method: "POST",
-                                            body: context
-                                        })
-                                        .then(response => response.text())
-                                        .then(answer => {
-                                            sendResponse({answer: answer})
-                                        })
-                                        .catch(error => sendResponse({answer: error}))
-                                })
+                log("Space Context")
+                log(context)
 
-                            })
+                return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                    {
+                        method: "POST",
+                        body: context
                     })
             })
+            .then(response => response.text())
+            .then(answer => sendResponse({answer: answer}))
             .catch(error => sendResponse({answer: error}))
     })
 }
@@ -763,8 +759,7 @@ function getContext(url, space, entities, query) {
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
-        if (entities.environment_names)
-        {
+        if (entities.environment_names) {
             promises.push(getReleaseLogs(url, space, entities.project_names[0], entities.environment_names[0], "latest"))
         } else {
             promises.push(getReleaseLogs(url, space, entities.project_names[0], null, "latest"))
@@ -821,9 +816,8 @@ function getProjectId(host, spaceId, projectName) {
                 }
             }
 
-            return null
+            throw "Could not find project " + projectName
         })
-        .catch(exception => console.log(exception))
 }
 
 function getEnvironmentId(host, spaceId, environmentName) {
@@ -840,9 +834,8 @@ function getEnvironmentId(host, spaceId, environmentName) {
                 }
             }
 
-            return null
+            throw "Could not find environment " + environmentName
         })
-        .catch(exception => console.log(exception))
 }
 
 function requiresReleaseHistory(query) {
@@ -857,7 +850,6 @@ function getReleaseHistory(url, space, project_names) {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
                 .then(response => response.text())
-                .catch(exception => console.log(exception))
             promises.push(promise)
         })
     } else {
@@ -865,7 +857,6 @@ function getReleaseHistory(url, space, project_names) {
         const promise = getProjectId(url.origin, space, projectName)
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
             .then(response => response.text())
-            .catch(exception => console.log(exception))
         promises.push(promise)
     }
     return promises
@@ -930,7 +921,6 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         })
         .then(response => response.json())
         .then(task => task["ActivityLogs"].map(logs => getLogs(logs)).join("\n"))
-        .catch(exception => console.log(exception))
 }
 
 function getLogs(logItem) {

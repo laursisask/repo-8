@@ -759,11 +759,9 @@ function getContext(url, space, entities, query) {
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
-        if (entities.environment_names) {
-            promises.push(getReleaseLogs(url, space, entities.project_names[0], entities.environment_names[0], "latest"))
-        } else {
-            promises.push(getReleaseLogs(url, space, entities.project_names[0], null, "latest"))
-        }
+        const environmentName =  entities.environment_names ? entities.environment_names[0] : null
+        const releaseVersion =  entities.release_versions ? entities.release_versions[0] : null
+        promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, releaseVersion))
     } else {
         const promise = convertSpace(
             url.origin,
@@ -914,7 +912,7 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         })
         .then(taskId => {
             if (taskId === null) {
-                return null
+                throw "No task found for deployment"
             }
 
             return fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`)

@@ -244,7 +244,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment.`,
         `What does the "${message.project}" project do?`,
         `What project variables are defined in the "${message.project}" project?`,
-        `List the project variables and the steps they are used in for the "${message.project}" project.`,
+        `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

@@ -246,6 +246,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     const options = [
         'Select a suggested query from the list',
         `List anything interesting in the deployment logs for the "${message.project}" project in the "Production" environment.`,
+        `List any URLs in the deployment logs for the "${message.project}" project in the "Production" environment.`,
         `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment.`,
         `What does the "${message.project}" project do?`,
         `What project variables are defined in the "${message.project}" project?`,

@@ -670,7 +670,27 @@ function queryLlm(query, sendResponse) {
                 return Promise.all(promises)
             })
             .then(results => {
-                const context = results.join("\n\n")
+                const context = {"hcl": "", "json": "", "context": ""}
+                results.forEach(result => {
+                    if (result.hcl) {
+                        if (context.hcl) {
+                            context.hcl += "\n\n"
+                        }
+                        context.hcl += result.hcl
+                    }
+                    if (result.json) {
+                        if (context.json) {
+                            context.json += "\n\n"
+                        }
+                        context.json += result.json
+                    }
+                    if (result.context) {
+                        if (context.context) {
+                            context.context += "\n\n"
+                        }
+                        context.context += result.context
+                    }
+                })
 
                 log("Space Context")
                 log(context)
@@ -797,6 +817,9 @@ function getContext(url, space, entities, query) {
             excludeAllProjectGroups,
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
         )
+            .then(hcl => {
+                return {"hcl": hcl}
+            })
         promises.push(promise)
     }
     return promises
@@ -853,7 +876,9 @@ function getEnvironmentId(host, spaceId, environmentName) {
 }
 
 function requiresReleaseHistory(query) {
-    return query.toLowerCase().indexOf("deployment") !== -1 || query.toLowerCase().indexOf("release") !== -1
+    return (query.toLowerCase().indexOf("deployment") !== -1 ||
+        query.toLowerCase().indexOf("release") !== -1) &&
+        query.toLowerCase().indexOf("log") === -1
 }
 
 function getReleaseHistory(url, space, project_names) {
@@ -865,7 +890,9 @@ function getReleaseHistory(url, space, project_names) {
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
                 .then(response => response.json())
                 .then(release => stripLinks(release))
-                .then(release => JSON.stringify(release))
+                .then(release => {
+                    return {"json": JSON.stringify(release)}
+                })
             promises.push(promise)
         })
     } else {
@@ -874,7 +901,9 @@ function getReleaseHistory(url, space, project_names) {
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
             .then(response => response.json())
             .then(release => stripLinks(release))
-            .then(release => JSON.stringify(release))
+            .then(release => {
+                return {"json": JSON.stringify(release)}
+            })
         promises.push(promise)
     }
     return promises
@@ -932,7 +961,9 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         })
         .then(taskId => fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`))
         .then(response => response.json())
-        .then(task => task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n"))
+        .then(task => {
+            return {"context": task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n")}
+        })
 }
 
 function getLogs(logItem, depth) {

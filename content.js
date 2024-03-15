@@ -82,12 +82,17 @@ function createOverlay() {
 
     // Create the select element
     const select = document.createElement('select');
+    const downArrowUrl = chrome.runtime.getURL("downarrow.png");
+    console.log(downArrowUrl);
     select.setAttribute('id', 'suggestions');
     select.style.display = 'none';
     select.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     select.style.borderRadius = '5px'
     select.style.width = '100%';
     select.style.fontSize = '20px';
+    select.style.background = `url(${downArrowUrl}) no-repeat right #ddd`;
+    select.style.backgroundPositionX = 'calc(100% - 8px)';
+    select.style["-webkit-appearance"] = "none";
 
     // Create the option elements and add them to the select
     const options = [

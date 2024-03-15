@@ -22,6 +22,6 @@
   },
   "web_accessible_resources": [{
     "matches": ["https://*.octopus.app/*"],
-    "resources": ["logo.png", "cross.png"]
+    "resources": ["logo.png", "cross.png", "downarrow.png"]
   }]
 }

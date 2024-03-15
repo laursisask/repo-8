@@ -698,7 +698,7 @@ function queryLlm(query, sendResponse) {
                 return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
                     {
                         method: "POST",
-                        body: context
+                        body: JSON.stringify(context)
                     })
             })
             .then(response => response.text())

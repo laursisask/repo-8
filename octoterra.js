@@ -891,7 +891,13 @@ function getReleaseHistory(url, space, project_names) {
                 .then(response => response.json())
                 .then(release => stripLinks(release))
                 .then(release => {
-                    return {"json": JSON.stringify(release)}
+                    // We only need the list of deployments
+                    const releases = {
+                        "Releases": release["Releases"].map(release => {
+                            return {"Deployments": release["Deployments"]}
+                        })
+                    }
+                    return {"json": JSON.stringify(releases, null, 2)}
                 })
             promises.push(promise)
         })
@@ -902,7 +908,7 @@ function getReleaseHistory(url, space, project_names) {
             .then(response => response.json())
             .then(release => stripLinks(release))
             .then(release => {
-                return {"json": JSON.stringify(release)}
+                return {"json": JSON.stringify(release, null, 2)}
             })
         promises.push(promise)
     }

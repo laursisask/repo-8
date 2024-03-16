@@ -890,14 +890,11 @@ function getReleaseHistory(url, space, project_names) {
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
                 .then(response => response.json())
                 .then(release => stripLinks(release))
-                .then(release => {
-                    // We only need the list of deployments
-                    const releases = {
-                        "Releases": release["Releases"].map(release => {
-                            return {"Deployments": release["Deployments"]}
-                        })
-                    }
-                    return {"json": JSON.stringify(releases, null, 2)}
+                .then(releases => {
+                    const deployments = releases["Releases"].flatMap(release => {
+                        return Object.values(release["Deployments"])
+                    }).flat()
+                    return {"json": JSON.stringify(deployments, null, 2)}
                 })
             promises.push(promise)
         })

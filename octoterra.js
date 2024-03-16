@@ -632,6 +632,7 @@
 const error = "An exception was thrown. If you are using this extension in early 2024, this may be a temporary error, and you can try again later. "
     + "If you are using the extension in late 2024, this extension is likely deprecated."
 const go = new Go();
+const MAX_CHARS = 13500 * 4
 
 function is_empty_array(array) {
     return typeof array === 'undefined' || array === null || array.length === 0
@@ -1032,7 +1033,11 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         .then(taskId => fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`))
         .then(response => response.json())
         .then(task => {
-            return {"context": task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n")}
+            let logs = task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n")
+            if (logs.length > MAX_CHARS) {
+                logs = logs.substring(0, MAX_CHARS)
+            }
+            return {"context": logs}
         })
 }
 

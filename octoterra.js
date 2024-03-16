@@ -714,12 +714,12 @@ function getContext(url, space, entities, query) {
     let promises = []
 
     if (requiresReleaseHistory(query)) {
-        promises.push(...getReleaseHistory(url, space, entities.project_names))
+        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names))
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
-        const environmentName =  entities.environment_names ? entities.environment_names[0] : null
-        const releaseVersion =  entities.release_versions ? entities.release_versions[0] : null
+        const environmentName = entities.environment_names ? entities.environment_names[0] : null
+        const releaseVersion = entities.release_versions ? entities.release_versions[0] : null
         promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, releaseVersion))
     } else {
         const excludeAllProjects = is_empty_array(entities.project_names) &&
@@ -826,7 +826,7 @@ function getContext(url, space, entities, query) {
 }
 
 function stripLinks(resource) {
-    if (resource["Links"])  {
+    if (resource["Links"]) {
         delete resource["Links"]
     }
 
@@ -877,15 +877,15 @@ function getEnvironmentId(host, spaceId, environmentName) {
 
 function requiresReleaseHistory(query) {
     return (query.toLowerCase().indexOf("deployment") !== -1 ||
-        query.toLowerCase().indexOf("release") !== -1) &&
+            query.toLowerCase().indexOf("release") !== -1) &&
         query.toLowerCase().indexOf("log") === -1
 }
 
-function getReleaseHistory(url, space, project_names) {
+function getReleaseHistory(url, space, projectNames, environmentNames) {
     const promises = []
-    if (project_names) {
+    if (projectNames) {
         // Look at the release history of each project
-        project_names.forEach(projectName => {
+        projectNames.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
                 .then(response => response.json())
@@ -894,7 +894,17 @@ function getReleaseHistory(url, space, project_names) {
                     const deployments = releases["Releases"].flatMap(release => {
                         return Object.values(release["Deployments"])
                     }).flat()
-                    const subset = deployments.slice(0, 3)
+
+                    const environmentIds = releases["Environments"]
+                        .filter(environment => {
+                            return environmentNames.indexOf(environment["Name"]) !== -1
+                        })
+                        .map(environment => environment["Id"])
+
+                    const filtered = deployments
+                        .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+
+                    const subset = filtered.slice(0, 3)
                     return {"json": JSON.stringify(subset, null, 2)}
                 })
             promises.push(promise)

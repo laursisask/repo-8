@@ -894,7 +894,8 @@ function getReleaseHistory(url, space, project_names) {
                     const deployments = releases["Releases"].flatMap(release => {
                         return Object.values(release["Deployments"])
                     }).flat()
-                    return {"json": JSON.stringify(deployments, null, 2)}
+                    const subset = deployments.slice(0, 3)
+                    return {"json": JSON.stringify(subset, null, 2)}
                 })
             promises.push(promise)
         })

@@ -648,9 +648,23 @@ function queryLlm(query, sendResponse) {
 
         const promises = [
             fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-                .then(response => response.json()),
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.json();
+                    }
+
+                    throw new Error('Something went wrong.');
+                }),
             fetch("convert_project.wasm")
-                .then(response => response.arrayBuffer())
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.arrayBuffer();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
                 .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
         ]
 
@@ -701,7 +715,14 @@ function queryLlm(query, sendResponse) {
                         body: JSON.stringify(context)
                     })
             })
-            .then(response => response.text())
+            .then(response => {
+                if(response.ok)
+                {
+                    return response.text();
+                }
+
+                throw new Error('Something went wrong.');
+            })
             .then(answer => sendResponse({answer: answer}))
             .catch(error => {
                 sendResponse({answer: error.toString()})
@@ -841,7 +862,14 @@ function stripLinks(resource) {
 
 function getProjectId(host, spaceId, projectName) {
     return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(json => {
             const projects = json["Items"].filter(item => item["Name"].toLowerCase() === projectName.toLowerCase())
             if (projects.length === 1) {
@@ -859,7 +887,14 @@ function getProjectId(host, spaceId, projectName) {
 
 function getEnvironmentId(host, spaceId, environmentName) {
     return fetch(`${host}/api/${spaceId}/Environments?partialName=${encodeURIComponent(environmentName)}&take=10000`)
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(json => {
             const projects = json["Items"].filter(item => item["Name"].toLowerCase() === environmentName.toLowerCase())
             if (projects.length === 1) {
@@ -888,7 +923,14 @@ function getReleaseHistory(url, space, projectNames, environmentNames) {
         projectNames.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-                .then(response => response.json())
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.json();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
                 .then(release => stripLinks(release))
                 .then(releases => {
                     const deployments = releases["Releases"].flatMap(release => {
@@ -913,7 +955,14 @@ function getReleaseHistory(url, space, projectNames, environmentNames) {
         // Look at the dashboard for a global view
         const promise = getProjectId(url.origin, space, projectName)
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
-            .then(response => response.json())
+            .then(response => {
+                if(response.ok)
+                {
+                    return response.json();
+                }
+
+                throw new Error('Something went wrong.');
+            })
             .then(release => stripLinks(release))
             .then(release => {
                 return {"json": JSON.stringify(release, null, 2)}
@@ -933,7 +982,14 @@ function requiresReleaseLogs(query, projectNames) {
 function getReleaseLogs(url, space, projectName, environmentName, release_version) {
     return getProjectId(url.origin, space, projectName)
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(progression => {
             if (!progression["Releases"]) {
                 return []

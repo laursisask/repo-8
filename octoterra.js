@@ -1084,6 +1084,14 @@ chrome.action.onClicked.addListener((tab) => {
                 target: {tabId: tab.id},
                 files: ['content.js']
             });
+            chrome.scripting.executeScript({
+                target: {tabId: tab.id},
+                files: ['marked.min.js']
+            });
+            chrome.scripting.insertCSS({
+                target: {tabId: tab.id},
+                files: ['style.css']
+            });
             getProjectName()
         } else {
             chrome.scripting.executeScript({

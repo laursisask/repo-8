@@ -113,21 +113,25 @@ function createOverlay() {
     const button = document.createElement('button');
     button.innerText = 'Submit';
     button.style.fontSize = '20px';
+    button.style.width = '100%';
     topDiv.appendChild(button);
 
     const answerHeading = document.createElement('h2');
     answerHeading.innerText = 'Answer';
     bottomDiv.appendChild(answerHeading);
 
-    const answer = document.createElement('textarea');
+    const answer = document.createElement('div');
     answer.id = "answer"
-    answer.readOnly = true
     answer.style.width = '100%';
     answer.style.fontSize = '20px';
     answer.style.height = '50vh';
-    answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
-    answer.style.borderRadius = '5px'
-    answer.value = `I am your AI assistant. Ask me anything and I'll try to answer it. For example, you can ask me:
+    answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif';
+    answer.style.borderRadius = '5px';
+    answer.style.overflowY = 'scroll';
+    answer.style.backgroundColor = 'white';
+    answer.style.color = 'black';
+    answer.style.padding = '5px';
+    answer.innerText = `I am your AI assistant. Ask me anything and I'll try to answer it. For example, you can ask me:
     
     - What project variables are in the project \"Your project name\"?
     - Where are the variables used in the project \"Your project name\"?
@@ -167,7 +171,7 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
                 .sendMessage({query: input.value})
                 .then(response => {
                     clearThinking(answer, input, button, suggest, intervalId)
-                    answer.value = response.answer
+                    answer.innerHTML = marked.parse(response.answer)
                     answer.scrollTop = answer.scrollHeight;
                 })
         } catch {
@@ -214,7 +218,7 @@ function setThinking() {
     let count = 1
     return setInterval(function () {
         count = (count + 1) % 3
-        answer.value = "Thinking" + ".".repeat(count + 1)
+        answer.innerText = "Thinking" + ".".repeat(count + 1)
     }, 1000);
 }
 

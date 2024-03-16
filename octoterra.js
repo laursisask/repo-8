@@ -747,7 +747,7 @@ function getContext(url, space, entities, query) {
         const excludeAllProjects = is_empty_array(entities.project_names) &&
             query.toLowerCase().indexOf("project") === -1
         const excludeAllTargets = is_empty_array(entities.target_names) &&
-            query.toLowerCase().indexOf("target") === -1
+            query.toLowerCase().indexOf("target") === -1 && query.toLowerCase().indexOf("machine") === -1 && query.toLowerCase().indexOf("agent") === -1
         const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
             query.toLowerCase().indexOf("runbook") === -1
         const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&

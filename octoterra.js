@@ -650,8 +650,7 @@ function queryLlm(query, sendResponse) {
         const promises = [
             fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
                 .then(response => {
-                    if(response.ok)
-                    {
+                    if (response.ok) {
                         return response.json();
                     }
 
@@ -659,8 +658,7 @@ function queryLlm(query, sendResponse) {
                 }),
             fetch("convert_project.wasm")
                 .then(response => {
-                    if(response.ok)
-                    {
+                    if (response.ok) {
                         return response.arrayBuffer();
                     }
 
@@ -717,8 +715,7 @@ function queryLlm(query, sendResponse) {
                     })
             })
             .then(response => {
-                if(response.ok)
-                {
+                if (response.ok) {
                     return response.text();
                 }
 
@@ -847,7 +844,7 @@ function getContext(url, space, entities, query) {
             excludeAllProjectGroups,
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllSteps,
-            (entities.step_names ? entities.step_names.join(",") : "")
+            entities.step_names ? entities.step_names.join(",") : "",
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllVariables,
             entities.variable_names ? entities.variable_names.join(",") : ""
@@ -877,8 +874,7 @@ function stripLinks(resource) {
 function getProjectId(host, spaceId, projectName) {
     return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
         .then(response => {
-            if(response.ok)
-            {
+            if (response.ok) {
                 return response.json();
             }
 
@@ -902,8 +898,7 @@ function getProjectId(host, spaceId, projectName) {
 function getEnvironmentId(host, spaceId, environmentName) {
     return fetch(`${host}/api/${spaceId}/Environments?partialName=${encodeURIComponent(environmentName)}&take=10000`)
         .then(response => {
-            if(response.ok)
-            {
+            if (response.ok) {
                 return response.json();
             }
 
@@ -938,8 +933,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames) {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
                 .then(response => {
-                    if(response.ok)
-                    {
+                    if (response.ok) {
                         return response.json();
                     }
 
@@ -970,8 +964,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames) {
         const promise = getProjectId(url.origin, space, projectName)
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
             .then(response => {
-                if(response.ok)
-                {
+                if (response.ok) {
                     return response.json();
                 }
 
@@ -997,8 +990,7 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
     return getProjectId(url.origin, space, projectName)
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
         .then(response => {
-            if(response.ok)
-            {
+            if (response.ok) {
                 return response.json();
             }
 

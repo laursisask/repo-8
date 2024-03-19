@@ -262,6 +262,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `What does the "${message.project}" project do (including steps and variables)?`,
         `What project variables are defined in the "${message.project}" project?`,
         `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
+        `Find steps in the "${message.project}" project with a type of "Octopus.Manual". Show the step name and type in a markdown table.`
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

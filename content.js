@@ -259,7 +259,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `List any URLs in the deployment logs for the "${message.project}" project in the "Production" environment.`,
         `List the release version and state for the latest deployment of the "${message.project}" project in the "Production" environment. Display the answer in a markdown table.`,
         `List the release version and state for the previous deployment of the "${message.project}" project in the "Production" environment. Display the answer in a markdown table.`,
-        `What does the "${message.project}" project do (including steps and variables)?`,
+        `What does the "${message.project}" project do (including steps and variables)? Display the answer in a markdown table.`,
         `What project variables are defined in the "${message.project}" project?`,
         `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
         `Find steps in the "${message.project}" project with a type of "Octopus.Manual". Show the step name and type in a markdown table.`

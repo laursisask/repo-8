@@ -809,7 +809,7 @@ function getContext(url, space, entities, query) {
         log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
         log("Exclude All Steps: " + excludeAllSteps)
         log("Steps: " + (entities.step_names ? entities.step_names.join(",") : ""))
-        log("Exclude All Variables: " + excludeAllSteps)
+        log("Exclude All Variables: " + excludeAllVariables)
         log("Variables: " + (entities.variable_names ? entities.variable_names.join(",") : ""))
 
         const promise = convertSpace(
@@ -845,7 +845,6 @@ function getContext(url, space, entities, query) {
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllSteps,
             entities.step_names ? entities.step_names.join(",") : "",
-            entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllVariables,
             entities.variable_names ? entities.variable_names.join(",") : ""
         )

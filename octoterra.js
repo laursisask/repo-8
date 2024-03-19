@@ -632,6 +632,7 @@
 const error = "An exception was thrown. If you are using this extension in early 2024, this may be a temporary error, and you can try again later. "
     + "If you are using the extension in late 2024, this extension is likely deprecated."
 const go = new Go();
+const MAX_CHARS = 13500 * 4
 
 function is_empty_array(array) {
     return typeof array === 'undefined' || array === null || array.length === 0
@@ -648,9 +649,23 @@ function queryLlm(query, sendResponse) {
 
         const promises = [
             fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-                .then(response => response.json()),
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.json();
+                    }
+
+                    throw new Error('Something went wrong.');
+                }),
             fetch("convert_project.wasm")
-                .then(response => response.arrayBuffer())
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.arrayBuffer();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
                 .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
         ]
 
@@ -670,7 +685,27 @@ function queryLlm(query, sendResponse) {
                 return Promise.all(promises)
             })
             .then(results => {
-                const context = results.join("\n\n")
+                const context = {"hcl": "", "json": "", "context": ""}
+                results.forEach(result => {
+                    if (result.hcl) {
+                        if (context.hcl) {
+                            context.hcl += "\n\n"
+                        }
+                        context.hcl += result.hcl
+                    }
+                    if (result.json) {
+                        if (context.json) {
+                            context.json += "\n\n"
+                        }
+                        context.json += result.json
+                    }
+                    if (result.context) {
+                        if (context.context) {
+                            context.context += "\n\n"
+                        }
+                        context.context += result.context
+                    }
+                })
 
                 log("Space Context")
                 log(context)
@@ -678,10 +713,17 @@ function queryLlm(query, sendResponse) {
                 return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
                     {
                         method: "POST",
-                        body: context
+                        body: JSON.stringify(context)
                     })
             })
-            .then(response => response.text())
+            .then(response => {
+                if(response.ok)
+                {
+                    return response.text();
+                }
+
+                throw new Error('Something went wrong.');
+            })
             .then(answer => sendResponse({answer: answer}))
             .catch(error => {
                 sendResponse({answer: error.toString()})
@@ -694,18 +736,18 @@ function getContext(url, space, entities, query) {
     let promises = []
 
     if (requiresReleaseHistory(query)) {
-        promises.push(...getReleaseHistory(url, space, entities.project_names))
+        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names))
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
-        const environmentName =  entities.environment_names ? entities.environment_names[0] : null
-        const releaseVersion =  entities.release_versions ? entities.release_versions[0] : null
+        const environmentName = entities.environment_names ? entities.environment_names[0] : null
+        const releaseVersion = entities.release_versions ? entities.release_versions[0] : null
         promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, releaseVersion))
     } else {
         const excludeAllProjects = is_empty_array(entities.project_names) &&
             query.toLowerCase().indexOf("project") === -1
         const excludeAllTargets = is_empty_array(entities.target_names) &&
-            query.toLowerCase().indexOf("target") === -1
+            query.toLowerCase().indexOf("target") === -1 && query.toLowerCase().indexOf("machine") === -1 && query.toLowerCase().indexOf("agent") === -1
         const excludeAllRunbooks = is_empty_array(entities.runbook_names) &&
             query.toLowerCase().indexOf("runbook") === -1
         const excludeAllVariableSets = is_empty_array(entities.library_variable_sets) &&
@@ -730,6 +772,8 @@ function getContext(url, space, entities, query) {
             query.toLowerCase().indexOf("tag") === -1
         const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
             query.toLowerCase().indexOf("project group") === -1
+        const excludeAllSteps = is_empty_array(entities.step_names) &&
+            query.toLowerCase().indexOf("step") === -1
         const excludeAllVariables = is_empty_array(entities.variable_names) &&
             query.toLowerCase().indexOf("variable") === -1
 
@@ -766,6 +810,8 @@ function getContext(url, space, entities, query) {
         log("Project Groups: " + (entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""))
         log("Channels: " + (entities.channel_names ? entities.channel_names.join(",") : ""))
         log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
+        log("Exclude All Steps: " + excludeAllSteps)
+        log("Steps: " + (entities.step_names ? entities.step_names.join(",") : ""))
         log("Exclude All Variables: " + excludeAllSteps)
         log("Variables: " + (entities.variable_names ? entities.variable_names.join(",") : ""))
 
@@ -800,16 +846,22 @@ function getContext(url, space, entities, query) {
             entities.tagset_names ? entities.tagset_names.join(",") : "",
             excludeAllProjectGroups,
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
+            excludeAllSteps,
+            (entities.step_names ? entities.step_names.join(",") : "")
+            entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllVariables,
             entities.variable_names ? entities.variable_names.join(",") : ""
         )
+            .then(hcl => {
+                return {"hcl": hcl}
+            })
         promises.push(promise)
     }
     return promises
 }
 
 function stripLinks(resource) {
-    if (resource["Links"])  {
+    if (resource["Links"]) {
         delete resource["Links"]
     }
 
@@ -824,7 +876,14 @@ function stripLinks(resource) {
 
 function getProjectId(host, spaceId, projectName) {
     return fetch(`${host}/api/${spaceId}/Projects?partialName=${encodeURIComponent(projectName)}&take=10000`)
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(json => {
             const projects = json["Items"].filter(item => item["Name"].toLowerCase() === projectName.toLowerCase())
             if (projects.length === 1) {
@@ -842,7 +901,14 @@ function getProjectId(host, spaceId, projectName) {
 
 function getEnvironmentId(host, spaceId, environmentName) {
     return fetch(`${host}/api/${spaceId}/Environments?partialName=${encodeURIComponent(environmentName)}&take=10000`)
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(json => {
             const projects = json["Items"].filter(item => item["Name"].toLowerCase() === environmentName.toLowerCase())
             if (projects.length === 1) {
@@ -859,28 +925,62 @@ function getEnvironmentId(host, spaceId, environmentName) {
 }
 
 function requiresReleaseHistory(query) {
-    return query.toLowerCase().indexOf("deployment") !== -1 || query.toLowerCase().indexOf("release") !== -1
+    return (query.toLowerCase().indexOf("deployment") !== -1 ||
+            query.toLowerCase().indexOf("release") !== -1) &&
+        query.toLowerCase().indexOf("log") === -1
 }
 
-function getReleaseHistory(url, space, project_names) {
+function getReleaseHistory(url, space, projectNames, environmentNames) {
     const promises = []
-    if (project_names) {
+    if (projectNames) {
         // Look at the release history of each project
-        project_names.forEach(projectName => {
+        projectNames.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
                 .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-                .then(response => response.json())
+                .then(response => {
+                    if(response.ok)
+                    {
+                        return response.json();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
                 .then(release => stripLinks(release))
-                .then(release => JSON.stringify(release))
+                .then(releases => {
+                    const deployments = releases["Releases"].flatMap(release => {
+                        return Object.values(release["Deployments"])
+                    }).flat()
+
+                    const environmentIds = releases["Environments"]
+                        .filter(environment => {
+                            return environmentNames.indexOf(environment["Name"]) !== -1
+                        })
+                        .map(environment => environment["Id"])
+
+                    const filtered = deployments
+                        .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+
+                    const subset = filtered.slice(0, 3)
+                    return {"json": JSON.stringify(subset, null, 2)}
+                })
             promises.push(promise)
         })
     } else {
         // Look at the dashboard for a global view
         const promise = getProjectId(url.origin, space, projectName)
             .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
-            .then(response => response.json())
+            .then(response => {
+                if(response.ok)
+                {
+                    return response.json();
+                }
+
+                throw new Error('Something went wrong.');
+            })
             .then(release => stripLinks(release))
-            .then(release => JSON.stringify(release))
+            .then(release => {
+                return {"json": JSON.stringify(release, null, 2)}
+            })
         promises.push(promise)
     }
     return promises
@@ -896,7 +996,14 @@ function requiresReleaseLogs(query, projectNames) {
 function getReleaseLogs(url, space, projectName, environmentName, release_version) {
     return getProjectId(url.origin, space, projectName)
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-        .then(response => response.json())
+        .then(response => {
+            if(response.ok)
+            {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
         .then(progression => {
             if (!progression["Releases"]) {
                 return []
@@ -938,7 +1045,13 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
         })
         .then(taskId => fetch(`${url.origin}/api/${space}/tasks/${taskId}/details`))
         .then(response => response.json())
-        .then(task => task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n"))
+        .then(task => {
+            let logs = task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n")
+            if (logs.length > MAX_CHARS) {
+                logs = logs.substring(0, MAX_CHARS)
+            }
+            return {"context": logs}
+        })
 }
 
 function getLogs(logItem, depth) {
@@ -988,6 +1101,14 @@ chrome.action.onClicked.addListener((tab) => {
             chrome.scripting.executeScript({
                 target: {tabId: tab.id},
                 files: ['content.js']
+            });
+            chrome.scripting.executeScript({
+                target: {tabId: tab.id},
+                files: ['marked.min.js']
+            });
+            chrome.scripting.insertCSS({
+                target: {tabId: tab.id},
+                files: ['style.css']
             });
             getProjectName()
         } else {

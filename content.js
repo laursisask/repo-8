@@ -82,12 +82,17 @@ function createOverlay() {
 
     // Create the select element
     const select = document.createElement('select');
+    const downArrowUrl = chrome.runtime.getURL("downarrow.png");
+    console.log(downArrowUrl);
     select.setAttribute('id', 'suggestions');
     select.style.display = 'none';
     select.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
     select.style.borderRadius = '5px'
     select.style.width = '100%';
     select.style.fontSize = '20px';
+    select.style.background = `url(${downArrowUrl}) no-repeat right #ddd`;
+    select.style.backgroundPositionX = 'calc(100% - 8px)';
+    select.style["-webkit-appearance"] = "none";
 
     // Create the option elements and add them to the select
     const options = [
@@ -108,25 +113,29 @@ function createOverlay() {
     const button = document.createElement('button');
     button.innerText = 'Submit';
     button.style.fontSize = '20px';
+    button.style.width = '100%';
     topDiv.appendChild(button);
 
     const answerHeading = document.createElement('h2');
     answerHeading.innerText = 'Answer';
     bottomDiv.appendChild(answerHeading);
 
-    const answer = document.createElement('textarea');
+    const answer = document.createElement('div');
     answer.id = "answer"
-    answer.readOnly = true
     answer.style.width = '100%';
     answer.style.fontSize = '20px';
     answer.style.height = '50vh';
-    answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif'
-    answer.style.borderRadius = '5px'
-    answer.value = `I am your AI assistant. Ask me anything and I'll try to answer it. For example, you can ask me:
+    answer.style.fontFamily = 'Roboto, Arial, Helvetica, sans-serif';
+    answer.style.borderRadius = '5px';
+    answer.style.overflowY = 'scroll';
+    answer.style.backgroundColor = 'white';
+    answer.style.color = 'black';
+    answer.style.padding = '5px';
+    answer.innerText = `I am your AI assistant. Ask me anything and I'll try to answer it. For example, you can ask me:
     
     - What project variables are in the project \"Your project name\"?
     - Where are the variables used in the project \"Your project name\"?
-    - What does \"Your project name\" do?
+    - What does \"Your project name\" do (including steps and variables)?
     - What targets are in the space?
     - What packages are used by the project \"Your project name\"?
     - What accounts are used by the "project \"Your project name\"?
@@ -162,7 +171,7 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
                 .sendMessage({query: input.value})
                 .then(response => {
                     clearThinking(answer, input, button, suggest, intervalId)
-                    answer.value = response.answer
+                    answer.innerHTML = marked.parse(response.answer)
                     answer.scrollTop = answer.scrollHeight;
                 })
         } catch {
@@ -209,7 +218,7 @@ function setThinking() {
     let count = 1
     return setInterval(function () {
         count = (count + 1) % 3
-        answer.value = "Thinking" + ".".repeat(count + 1)
+        answer.innerText = "Thinking" + ".".repeat(count + 1)
     }, 1000);
 }
 
@@ -224,6 +233,12 @@ if (!overlayExists()) {
     createOverlay()
 } else {
     destroyOverlay()
+}
+
+document.onkeyup = function(e) {
+    if (e.key === "Escape") {
+        destroyOverlay()
+    }
 }
 
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
@@ -241,10 +256,13 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     const options = [
         'Select a suggested query from the list',
         `List anything interesting in the deployment logs for the "${message.project}" project in the "Production" environment.`,
-        `List the release version for the latest deployment of the "${message.project}" project in the "Production" environment.`,
-        `What does the "${message.project}" project do?`,
+        `List any URLs in the deployment logs for the "${message.project}" project in the "Production" environment.`,
+        `List the release version and state for the latest deployment of the "${message.project}" project in the "Production" environment.`,
+        `List the release version and state for the previous deployment of the "${message.project}" project in the "Production" environment.`,
+        `What does the "${message.project}" project do (including steps and variables)?`,
         `What project variables are defined in the "${message.project}" project?`,
         `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
+        `Find steps in the "${message.project}" project with a type of "Octopus.Manual". Show the step name and type in a markdown table.`
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

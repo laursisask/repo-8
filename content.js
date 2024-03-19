@@ -235,6 +235,12 @@ if (!overlayExists()) {
     destroyOverlay()
 }
 
+document.onkeyup = function(e) {
+    if (e.key === "Escape") {
+        destroyOverlay()
+    }
+}
+
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     const suggestions = document.getElementById('suggestions');
 

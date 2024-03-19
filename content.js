@@ -135,7 +135,7 @@ function createOverlay() {
     
     - What project variables are in the project \"Your project name\"?
     - Where are the variables used in the project \"Your project name\"?
-    - What does \"Your project name\" do?
+    - What does \"Your project name\" do (including steps and variables)?
     - What targets are in the space?
     - What packages are used by the project \"Your project name\"?
     - What accounts are used by the "project \"Your project name\"?
@@ -253,7 +253,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `List any URLs in the deployment logs for the "${message.project}" project in the "Production" environment.`,
         `List the release version and state for the latest deployment of the "${message.project}" project in the "Production" environment.`,
         `List the release version and state for the previous deployment of the "${message.project}" project in the "Production" environment.`,
-        `What does the "${message.project}" project do?`,
+        `What does the "${message.project}" project do (including steps and variables)?`,
         `What project variables are defined in the "${message.project}" project?`,
         `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
     ]

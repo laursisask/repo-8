@@ -730,6 +730,8 @@ function getContext(url, space, entities, query) {
             query.toLowerCase().indexOf("tag") === -1
         const excludeAllProjectGroups = is_empty_array(entities.projectgroup_names) &&
             query.toLowerCase().indexOf("project group") === -1
+        const excludeAllVariables = is_empty_array(entities.variable_names) &&
+            query.toLowerCase().indexOf("variable") === -1
 
         log("Arguments")
         log("URL: " + url.origin)
@@ -764,6 +766,8 @@ function getContext(url, space, entities, query) {
         log("Project Groups: " + (entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""))
         log("Channels: " + (entities.channel_names ? entities.channel_names.join(",") : ""))
         log("Release Versions: " + (entities.release_versions ? entities.release_versions.join(",") : ""))
+        log("Exclude All Variables: " + excludeAllSteps)
+        log("Variables: " + (entities.variable_names ? entities.variable_names.join(",") : ""))
 
         const promise = convertSpace(
             url.origin,
@@ -795,7 +799,9 @@ function getContext(url, space, entities, query) {
             excludeAllTagSets,
             entities.tagset_names ? entities.tagset_names.join(",") : "",
             excludeAllProjectGroups,
-            entities.projectgroup_names ? entities.projectgroup_names.join(",") : ""
+            entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
+            excludeAllVariables,
+            entities.variable_names ? entities.variable_names.join(",") : ""
         )
         promises.push(promise)
     }

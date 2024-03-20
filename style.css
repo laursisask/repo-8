@@ -5,3 +5,7 @@
 #answer * {
     color: black
 }
+
+#answer table {
+    border: solid 2px lightgrey
+}

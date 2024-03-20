@@ -97,7 +97,20 @@ function createOverlay() {
     // Create the option elements and add them to the select
     const options = [
         'Select a suggested query from the list',
-        'List anything interesting in the deployment logs for the "project name" project in the "environment name" environment'
+        `List the unique project names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique project group names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique environment names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique tenant names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique feed names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique account names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique library variable set names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique worker pool names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique machine names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique certificate names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique tag set names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique lifecycle names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique git credential names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique machine policy names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
     ];
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');
@@ -262,7 +275,21 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `What does the "${message.project}" project do (including steps and variables)? Display the answer in a markdown table.`,
         `What project variables are defined in the "${message.project}" project?`,
         `List the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project.`,
-        `Find steps in the "${message.project}" project with a type of "Octopus.Manual". Show the step name and type in a markdown table.`
+        `Find steps in the "${message.project}" project with a type of "Octopus.Manual". Show the step name and type in a markdown table.`,
+        `List the unique project names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique project group names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique environment names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique tenant names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique feed names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique account names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique library variable set names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique worker pool names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique machine names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique certificate names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique tag set names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique lifecycle names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique git credential names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
+        `List the unique machine policy names in the space, sorted in alphabetical order. Display the answer in a markdown table.`,
     ]
     for (let i = 0; i < options.length; i++) {
         const option = document.createElement('option');

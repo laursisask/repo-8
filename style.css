@@ -6,6 +6,7 @@
     color: black
 }
 
-#answer table {
-    border: solid 2px lightgrey
+#answer table, td, th {
+    border: solid 2px lightgrey;
+    border-collapse: collapse;
 }

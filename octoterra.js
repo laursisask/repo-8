@@ -655,77 +655,83 @@ function queryLlm(query, sendResponse) {
                     }
 
                     throw new Error('Something went wrong.');
-                }),
-            fetch("convert_project.wasm")
-                .then(response => {
-                    if (response.ok) {
-                        return response.arrayBuffer();
-                    }
-
-                    throw new Error('Something went wrong.');
                 })
-                .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
-        ]
-
-        Promise.all(promises)
-            .then(results => {
-                const entities = results[0]
-                const wasm = results[1]
-
-                go.run(wasm.instance);
-
-                log("URL and space")
-                log(JSON.stringify(url.origin))
-                log(JSON.stringify(space))
-
-                const promises = getContext(url, space, entities, query)
-
-                return Promise.all(promises)
-            })
-            .then(results => {
-                const context = {"hcl": "", "json": "", "context": ""}
-                results.forEach(result => {
-                    if (result.hcl) {
-                        if (context.hcl) {
-                            context.hcl += "\n\n"
-                        }
-                        context.hcl += result.hcl
-                    }
-                    if (result.json) {
-                        if (context.json) {
-                            context.json += "\n\n"
-                        }
-                        context.json += result.json
-                    }
-                    if (result.context) {
-                        if (context.context) {
-                            context.context += "\n\n"
-                        }
-                        context.context += result.context
-                    }
-                })
-
-                log("Space Context")
-                log(context)
-
-                return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
-                    {
-                        method: "POST",
-                        body: JSON.stringify(context)
-                    })
-            })
+                // Enrich the entities with tenant IDs
+                .then(entities => getTenantIds(url, space, entities.tenant_names)
+                    .then(tenantIds => {
+                        entities.tenant_ids = tenantIds
+                        return entities
+                    })),
+        fetch("convert_project.wasm")
             .then(response => {
                 if (response.ok) {
-                    return response.text();
+                    return response.arrayBuffer();
                 }
 
                 throw new Error('Something went wrong.');
             })
-            .then(answer => sendResponse({answer: answer}))
-            .catch(error => {
-                sendResponse({answer: error.toString()})
+            .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
+]
+
+    Promise.all(promises)
+        .then(results => {
+            const entities = results[0]
+            const wasm = results[1]
+
+            go.run(wasm.instance);
+
+            log("URL and space")
+            log(JSON.stringify(url.origin))
+            log(JSON.stringify(space))
+
+            const promises = getContext(url, space, entities, query)
+
+            return Promise.all(promises)
+        })
+        .then(results => {
+            const context = {"hcl": "", "json": "", "context": ""}
+            results.forEach(result => {
+                if (result.hcl) {
+                    if (context.hcl) {
+                        context.hcl += "\n\n"
+                    }
+                    context.hcl += result.hcl
+                }
+                if (result.json) {
+                    if (context.json) {
+                        context.json += "\n\n"
+                    }
+                    context.json += result.json
+                }
+                if (result.context) {
+                    if (context.context) {
+                        context.context += "\n\n"
+                    }
+                    context.context += result.context
+                }
             })
-    })
+
+            log("Space Context")
+            log(context)
+
+            return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                {
+                    method: "POST",
+                    body: JSON.stringify(context)
+                })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+
+            throw new Error('Something went wrong.');
+        })
+        .then(answer => sendResponse({answer: answer}))
+        .catch(error => {
+            sendResponse({answer: error.toString()})
+        })}
+    )
 }
 
 
@@ -733,7 +739,7 @@ function getContext(url, space, entities, query) {
     let promises = []
 
     if (requiresReleaseHistory(query)) {
-        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names))
+        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names, entities.tenant_ids))
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
@@ -929,8 +935,24 @@ function requiresReleaseHistory(query) {
         query.toLowerCase().indexOf("log") === -1
 }
 
-function getReleaseHistory(url, space, projectNames, environmentNames) {
+function getTenantIds(url, space, tenantNames) {
+    const tenantIds = []
+    if (tenantNames) {
+        for (const tenant of tenantNames) {
+            tenantIds.push(fetch(`${url.origin}/api/${space}/Tenants?partialName=${encodeURIComponent(tenant)}&take=10000`)
+                .then(response => response.json())
+                .then(json => json["Items"].filter(item => item["Name"].toLowerCase() === tenant.toLowerCase()))
+                .then(items => items.map(item => item["Id"]))
+                .then(items => items.pop()))
+        }
+    }
+
+    return Promise.all(tenantIds)
+}
+
+function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds) {
     const promises = []
+
     if (projectNames) {
         // Look at the release history of each project
         projectNames.forEach(projectName => {
@@ -957,6 +979,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames) {
 
                     const filtered = deployments
                         .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+                        .filter(deployment => !tenantIds || tenantIds.indexOf(deployment["TenantId"]) !== -1)
 
                     const subset = filtered.slice(0, 3)
                     return {"json": JSON.stringify(subset, null, 2)}

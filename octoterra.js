@@ -811,6 +811,8 @@ function getContext(url, space, entities, query) {
         log("Steps: " + (entities.step_names ? entities.step_names.join(",") : ""))
         log("Exclude All Variables: " + excludeAllVariables)
         log("Variables: " + (entities.variable_names ? entities.variable_names.join(",") : ""))
+        log("Exclude All Tenant Variables: " + excludeAllVariables)
+        log("Tenant Variables: " + (entities.variable_names ? entities.variable_names.join(",") : ""))
 
         const promise = convertSpace(
             url.origin,
@@ -845,6 +847,9 @@ function getContext(url, space, entities, query) {
             entities.projectgroup_names ? entities.projectgroup_names.join(",") : "",
             excludeAllSteps,
             entities.step_names ? entities.step_names.join(",") : "",
+            excludeAllVariables,
+            entities.variable_names ? entities.variable_names.join(",") : "",
+            // We don't differentiate between tenant variables and project variables
             excludeAllVariables,
             entities.variable_names ? entities.variable_names.join(",") : ""
         )

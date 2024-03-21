@@ -647,6 +647,9 @@ function queryLlm(query, sendResponse) {
         const url = new URL(tabs[0].url)
         const space = tabs[0].url.split("/")[4]
 
+        // We need two resources to continue:
+        // 1. The list of entities in the query
+        // 2. The WASM library
         const promises = [
             fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
                 .then(response => {

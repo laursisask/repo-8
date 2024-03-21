@@ -748,7 +748,7 @@ function getContext(url, space, entities, query) {
     if (requiresReleaseLogs(query, entities.project_names)) {
         const environmentName = entities.environment_names ? entities.environment_names[0] : null
         const releaseVersion = entities.release_versions ? entities.release_versions[0] : null
-        promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, releaseVersion))
+        promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, entities.tenant_ids, releaseVersion))
     } else {
         const excludeAllProjects = is_empty_array(entities.project_names) &&
             query.toLowerCase().indexOf("project") === -1
@@ -1016,7 +1016,7 @@ function requiresReleaseLogs(query, projectNames) {
     return query.toLowerCase().indexOf("log") !== -1
 }
 
-function getReleaseLogs(url, space, projectName, environmentName, release_version) {
+function getReleaseLogs(url, space, projectName, environmentName, tenantIds, release_version) {
     return getProjectId(url.origin, space, projectName)
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
         .then(response => {
@@ -1042,6 +1042,7 @@ function getReleaseLogs(url, space, projectName, environmentName, release_versio
                         }
 
                         return releases.map(release => release["Deployments"][environmentId]).flat()
+                            .filter(deployment => !tenantIds || tenantIds.indexOf(deployment["TenantId"]) !== -1)
                     })
             }
 

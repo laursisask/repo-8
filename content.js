@@ -79,6 +79,7 @@ function createOverlay() {
     suggest.style.fontSize = '20px';
     suggest.style.width = '50px';
     suggest.style.borderRadius = '5px';
+    suggest.title = 'Suggest a query';
     queryDiv.appendChild(suggest);
 
     // Create the select element
@@ -169,7 +170,7 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
     close.style.marginRight = '10px';
     close.style.cursor = 'pointer';
     close.style.zIndex = 10001;
-    overlay.appendChild(close)
+    overlay.appendChild(close);
 
     close.onclick = function () {
         destroyOverlay()

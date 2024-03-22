@@ -945,7 +945,13 @@ function getTenantIds(url, space, tenantNames) {
     if (tenantNames) {
         for (const tenant of tenantNames) {
             tenantIds.push(fetch(`${url.origin}/api/${space}/Tenants?partialName=${encodeURIComponent(tenant)}&take=10000`)
-                .then(response => response.json())
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
                 .then(json => json["Items"].filter(item => item["Name"].toLowerCase() === tenant.toLowerCase()))
                 .then(items => items.map(item => item["Id"]))
                 .then(items => items.pop()))

@@ -78,6 +78,7 @@ function createOverlay() {
     suggest.innerText = '?';
     suggest.style.fontSize = '20px';
     suggest.style.width = '50px';
+    suggest.style.borderRadius = '5px';
     queryDiv.appendChild(suggest);
 
     // Create the select element

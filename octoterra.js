@@ -662,7 +662,9 @@ function queryLlm(query, sendResponse) {
                 // Enrich the entities with tenant IDs
                 .then(entities => getTenantIds(url, space, entities.tenant_names)
                     .then(tenantIds => {
-                        entities.tenant_ids = tenantIds
+                        if (tenantIds && tenantIds.length > 0) {
+                            entities.tenant_ids = tenantIds
+                        }
                         return entities
                     })),
         fetch("convert_project.wasm")

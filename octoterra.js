@@ -743,8 +743,15 @@ function queryLlm(query, sendResponse) {
 function getContext(url, space, entities, query) {
     let promises = []
 
+    let forceAllEnvironments = false
+    let forceAllProjects = false
+
     if (requiresReleaseHistory(query)) {
         promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names, entities.tenant_ids))
+
+        // If no projects or environments were mentioned, place all of them in context
+        forceAllProjects = !entities.project_names || entities.project_names.length === 0
+        forceAllEnvironments = !entities.environment_names || entities.environment_names.length === 0
     }
 
     if (requiresReleaseLogs(query, entities.project_names)) {
@@ -752,7 +759,8 @@ function getContext(url, space, entities, query) {
         const releaseVersion = entities.release_versions ? entities.release_versions[0] : null
         promises.push(getReleaseLogs(url, space, entities.project_names[0], environmentName, entities.tenant_ids, releaseVersion))
     } else {
-        const excludeAllProjects = is_empty_array(entities.project_names) &&
+        const excludeAllProjects = !forceAllProjects &&
+            is_empty_array(entities.project_names) &&
             query.toLowerCase().indexOf("project") === -1
         const excludeAllTargets = is_empty_array(entities.target_names) &&
             query.toLowerCase().indexOf("target") === -1 && query.toLowerCase().indexOf("machine") === -1 && query.toLowerCase().indexOf("agent") === -1
@@ -762,7 +770,8 @@ function getContext(url, space, entities, query) {
             query.toLowerCase().indexOf("library variable set") === -1
         const excludeAllTenants = is_empty_array(entities.tenant_names) &&
             query.toLowerCase().indexOf("tenant") === -1
-        const excludeAllEnvironments = is_empty_array(entities.environment_names) &&
+        const excludeAllEnvironments = !forceAllEnvironments &&
+            is_empty_array(entities.environment_names) &&
             query.toLowerCase().indexOf("environment") === -1
         const excludeAllFeeds = is_empty_array(entities.feed_names) &&
             query.toLowerCase().indexOf("feed") === -1
@@ -964,7 +973,7 @@ function getTenantIds(url, space, tenantNames) {
 function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds) {
     const promises = []
 
-    if (projectNames) {
+    if (projectNames && projectNames.length > 0) {
         // Look at the release history of each project
         projectNames.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
@@ -999,8 +1008,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
         })
     } else {
         // Look at the dashboard for a global view
-        const promise = getProjectId(url.origin, space, projectName)
-            .then(projectId => fetch(`${url.origin}/api/${space}/Dashboard`))
+        const promise = fetch(`${url.origin}/api/${space}/Dashboard`)
             .then(response => {
                 if (response.ok) {
                     return response.json();
@@ -1009,6 +1017,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                 throw new Error('Something went wrong.');
             })
             .then(release => stripLinks(release))
+            .then(release => release["Items"])
             .then(release => {
                 return {"json": JSON.stringify(release, null, 2)}
             })

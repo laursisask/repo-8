@@ -973,7 +973,7 @@ function getTenantIds(url, space, tenantNames) {
 function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds) {
     const promises = []
 
-    if (projectNames && projectNames.length > 0) {
+    if (!isEmptyArray(projectNames)) {
         // Look at the release history of each project
         projectNames.forEach(projectName => {
             const promise = getProjectId(url.origin, space, projectName)
@@ -993,13 +993,13 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
 
                     const environmentIds = releases["Environments"]
                         .filter(environment => {
-                            return environmentNames.indexOf(environment["Name"]) !== -1
+                            return environmentNames && environmentNames.indexOf(environment["Name"]) !== -1
                         })
                         .map(environment => environment["Id"])
 
                     const filtered = deployments
-                        .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
-                        .filter(deployment => !tenantIds || tenantIds.indexOf(deployment["TenantId"]) !== -1)
+                        .filter(deployment => isEmptyArray(environmentIds) || environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+                        .filter(deployment => isEmptyArray(tenantIds) || tenantIds.indexOf(deployment["TenantId"]) !== -1)
 
                     const subset = filtered.slice(0, 3)
                     return {"json": JSON.stringify(subset, null, 2)}
@@ -1016,14 +1016,29 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
 
                 throw new Error('Something went wrong.');
             })
-            .then(release => stripLinks(release))
-            .then(release => release["Items"])
-            .then(release => {
-                return {"json": JSON.stringify(release, null, 2)}
+            .then(releases => stripLinks(releases))
+            .then(releases => {
+                const deployments = releases["Items"]
+
+                const environmentIds = releases["Environments"]
+                    .filter(environment => {
+                        return environmentNames && environmentNames.indexOf(environment["Name"]) !== -1
+                    })
+                    .map(environment => environment["Id"])
+
+                const filtered = deployments
+                    .filter(deployment => isEmptyArray(environmentIds) || environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+
+                const subset = filtered.slice(0, 3)
+                return {"json": JSON.stringify(subset, null, 2)}
             })
         promises.push(promise)
     }
     return promises
+}
+
+function isEmptyArray(array) {
+    return typeof array === 'undefined' || array === null || array.length === 0
 }
 
 function requiresReleaseLogs(query, projectNames) {

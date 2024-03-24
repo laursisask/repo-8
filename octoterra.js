@@ -1103,7 +1103,8 @@ function getReleaseLogs(url, space, projectName, environmentName, tenantIds, rel
         .then(task => {
             let logs = task["ActivityLogs"].map(logs => getLogs(logs, 0)).join("\n")
             if (logs.length > MAX_CHARS) {
-                logs = logs.substring(0, MAX_CHARS)
+                // Get the end of the logs, as this is where the interesting content usually is
+                logs = logs.substring(logs.length - MAX_CHARS, logs.length)
             }
             return {"context": logs}
         })

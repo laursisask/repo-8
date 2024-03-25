@@ -185,6 +185,10 @@ As an AI I sometimes make mistakes. Verify the information I provide before maki
     }
 
     function submit() {
+        if (input.value.trim() === "") {
+            return
+        }
+
         var intervalId = setThinking()
         try {
             input.disabled = true

@@ -131,6 +131,14 @@ function createOverlay() {
     button.style.width = '100%';
     topDiv.appendChild(button);
 
+    const promptEngineeringLink = document.createElement('a');
+    promptEngineeringLink.href = 'https://github.com/OctopusSolutionsEngineering/OctopusCopilot/wiki/Prompt-Engineering-with-Octopus';
+    promptEngineeringLink.innerText = 'Prompt Engineering Docs';
+    promptEngineeringLink.style.marginTop = '10px'
+    promptEngineeringLink.style.display = 'block'
+    promptEngineeringLink.style.textAlign = 'right'
+    topDiv.appendChild(promptEngineeringLink);
+
     const answerHeading = document.createElement('h2');
     answerHeading.innerText = 'Answer';
     bottomDiv.appendChild(answerHeading);

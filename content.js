@@ -290,7 +290,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         `What does the "${message.project}" project do (including steps and variables)?`,
         `What project variables are defined in the "${message.project}" project?`,
         `What are the project variables and the steps (including disabled steps) they are used in for the "${message.project}" project?`,
-        `What are the steps in the "${message.project}" project with a type of "Octopus.Manual"? Show the step name and type in a markdown table.`,
+        `What are the steps in the "${message.project}" project with a step type of "Octopus.Manual"? Show the step name and type in a markdown table.`,
         `What is the ID of the "${message.project}" project?`,
         `What are the unique project names in the space, sorted in alphabetical order? Display the answer in a markdown table.`,
         `What are the unique project group names in the space, sorted in alphabetical order? Display the answer in a markdown table.`,

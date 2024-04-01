@@ -1001,7 +1001,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                         .filter(deployment => isEmptyArray(environmentIds) || environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
                         .filter(deployment => isEmptyArray(tenantIds) || tenantIds.indexOf(deployment["TenantId"]) !== -1)
 
-                    const subset = filtered.slice(0, 3)
+                    const subset = filtered.slice(0, 20)
                     return {"json": JSON.stringify(subset, null, 2)}
                 })
             promises.push(promise)

@@ -643,7 +643,7 @@ function log(message) {
 }
 
 function queryLlm(query, sendResponse) {
-    getProjectName(function(projectName) {
+    getProjectName(function(tabId, projectName) {
         // If a project is opened but not mentioned add it to the query
         if (projectName && query.indexOf(projectName) === -1) {
             query += "\nThe project is " + projectName
@@ -1142,7 +1142,7 @@ function getProjectName(callback) {
 
                 fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
                     .then(response => response.json())
-                    .then(project => callback(project["Name"]))
+                    .then(project => callback(tabs[0].id, project["Name"]))
             }
         } catch {
             callback(null)
@@ -1174,9 +1174,9 @@ chrome.action.onClicked.addListener((tab) => {
                 target: {tabId: tab.id},
                 files: ['style.css']
             });
-            getProjectName(function(projectName){
+            getProjectName(function(tabId, projectName){
                 if (projectName) {
-                    chrome.tabs.sendMessage(tabs[0].id, {project: projectName})
+                    chrome.tabs.sendMessage(tabId, {project: projectName})
                 }
             })
         } else {

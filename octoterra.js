@@ -643,100 +643,107 @@ function log(message) {
 }
 
 function queryLlm(query, sendResponse) {
-    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-        const url = new URL(tabs[0].url)
-        const space = tabs[0].url.split("/")[4]
+    getProjectName(function(projectName) {
+        // If a project is opened but not mentioned add it to the query
+        if (projectName && query.indexOf(projectName) === -1) {
+            query += "\nThe project is " + projectName
+        }
 
-        // We need two resources to continue:
-        // 1. The list of entities in the query
-        // 2. The WASM library
-        const promises = [
-            fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
+        chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+            const url = new URL(tabs[0].url)
+            const space = tabs[0].url.split("/")[4]
 
-                    throw new Error('Something went wrong.');
-                })
-                // Enrich the entities with tenant IDs
-                .then(entities => getTenantIds(url, space, entities.tenant_names)
-                    .then(tenantIds => {
-                        if (tenantIds && tenantIds.length > 0) {
-                            entities.tenant_ids = tenantIds
+            // We need two resources to continue:
+            // 1. The list of entities in the query
+            // 2. The WASM library
+            const promises = [
+                fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
                         }
-                        return entities
-                    })),
-        fetch("convert_project.wasm")
+
+                        throw new Error('Something went wrong.');
+                    })
+                    // Enrich the entities with tenant IDs
+                    .then(entities => getTenantIds(url, space, entities.tenant_names)
+                        .then(tenantIds => {
+                            if (tenantIds && tenantIds.length > 0) {
+                                entities.tenant_ids = tenantIds
+                            }
+                            return entities
+                        })),
+                fetch("convert_project.wasm")
+                    .then(response => {
+                        if (response.ok) {
+                            return response.arrayBuffer();
+                        }
+
+                        throw new Error('Something went wrong.');
+                    })
+                    .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
+            ]
+
+        Promise.all(promises)
+            .then(results => {
+                const entities = results[0]
+                const wasm = results[1]
+
+                go.run(wasm.instance);
+
+                log("URL and space")
+                log(JSON.stringify(url.origin))
+                log(JSON.stringify(space))
+
+                const promises = getContext(url, space, entities, query)
+
+                return Promise.all(promises)
+            })
+            .then(results => {
+                const context = {"hcl": "", "json": "", "context": ""}
+                results.forEach(result => {
+                    if (result.hcl) {
+                        if (context.hcl) {
+                            context.hcl += "\n\n"
+                        }
+                        context.hcl += result.hcl
+                    }
+                    if (result.json) {
+                        if (context.json) {
+                            context.json += "\n\n"
+                        }
+                        context.json += result.json
+                    }
+                    if (result.context) {
+                        if (context.context) {
+                            context.context += "\n\n"
+                        }
+                        context.context += result.context
+                    }
+                })
+
+                log("Space Context")
+                log(context)
+
+                return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                    {
+                        method: "POST",
+                        body: JSON.stringify(context)
+                    })
+            })
             .then(response => {
                 if (response.ok) {
-                    return response.arrayBuffer();
+                    return response.text();
                 }
 
                 throw new Error('Something went wrong.');
             })
-            .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
-]
-
-    Promise.all(promises)
-        .then(results => {
-            const entities = results[0]
-            const wasm = results[1]
-
-            go.run(wasm.instance);
-
-            log("URL and space")
-            log(JSON.stringify(url.origin))
-            log(JSON.stringify(space))
-
-            const promises = getContext(url, space, entities, query)
-
-            return Promise.all(promises)
-        })
-        .then(results => {
-            const context = {"hcl": "", "json": "", "context": ""}
-            results.forEach(result => {
-                if (result.hcl) {
-                    if (context.hcl) {
-                        context.hcl += "\n\n"
-                    }
-                    context.hcl += result.hcl
-                }
-                if (result.json) {
-                    if (context.json) {
-                        context.json += "\n\n"
-                    }
-                    context.json += result.json
-                }
-                if (result.context) {
-                    if (context.context) {
-                        context.context += "\n\n"
-                    }
-                    context.context += result.context
-                }
-            })
-
-            log("Space Context")
-            log(context)
-
-            return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
-                {
-                    method: "POST",
-                    body: JSON.stringify(context)
-                })
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.text();
-            }
-
-            throw new Error('Something went wrong.');
-        })
-        .then(answer => sendResponse({answer: answer}))
-        .catch(error => {
-            sendResponse({answer: error.toString()})
-        })}
-    )
+            .then(answer => sendResponse({answer: answer}))
+            .catch(error => {
+                sendResponse({answer: error.toString()})
+            })}
+        )
+    })
 }
 
 
@@ -1122,7 +1129,7 @@ function getLogs(logItem, depth) {
     return logs
 }
 
-function getProjectName() {
+function getProjectName(callback) {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
         try {
             const url = new URL(tabs[0].url)
@@ -1134,10 +1141,10 @@ function getProjectName() {
 
                 fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
                     .then(response => response.json())
-                    .then(project => chrome.tabs.sendMessage(tabs[0].id, {project: project["Name"]}))
+                    .then(project => callback(project["Name"]))
             }
         } catch {
-            // probably an invalid URL
+            callback(null)
         }
     })
 }
@@ -1166,7 +1173,11 @@ chrome.action.onClicked.addListener((tab) => {
                 target: {tabId: tab.id},
                 files: ['style.css']
             });
-            getProjectName()
+            getProjectName(function(projectName){
+                if (projectName) {
+                    chrome.tabs.sendMessage(tabs[0].id, {project: projectName})
+                }
+            })
         } else {
             chrome.scripting.executeScript({
                 target: {tabId: tab.id},

@@ -1064,15 +1064,15 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                     "Created": releaseDeploymentAndTask["Deployment"]["Created"],
                                     "TaskState": releaseDeploymentAndTask["Task"]["State"],
                                     "TaskDuration": releaseDeploymentAndTask["Task"]["Duration"],
-                                    "ReleaseNotes": stripMarkdownUrls(releasesAndDeployment["Release"]["ReleaseNotes"]),
-                                    "DeployedBy": releasesAndDeployment["Deployment"]["DeployedBy"],
+                                    "ReleaseNotes": stripMarkdownUrls(releaseDeploymentAndTask["Release"]["ReleaseNotes"]),
+                                    "DeployedBy": releaseDeploymentAndTask["Deployment"]["DeployedBy"],
                                 }
                             })
                         })
                 })
             })
 
-            promises.push(promise)
+        promises.push(promise)
     } else {
         // Look at the dashboard for a global view
         const promise = fetch(`${url.origin}/api/${space}/Dashboard`)
@@ -1102,6 +1102,11 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
         promises.push(promise)
     }
     return promises
+}
+
+function stripMarkdownUrls(text) {
+    const urlRegex = /\[(.*?)]\((.*?)\)/g;
+    return text.replace(urlRegex, '$1');
 }
 
 function isEmptyArray(array) {

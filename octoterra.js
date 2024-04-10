@@ -1068,13 +1068,13 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                     "DeployedBy": releaseDeploymentAndTask["Deployment"]["DeployedBy"],
                                 }
                             })
-
-
                         })
                 })
             })
             .then(promises => Promise.all(promises))
             .then(results => {
+                // We have an array containing arrays of deployments for each project.
+                // We want to flatten this to a single array, and then return an object that references the array.
                 return {"json": JSON.stringify({"Deployments": results.flatMap(result => result)}, null, 2)}
             })
 

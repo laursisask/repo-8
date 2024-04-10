@@ -642,109 +642,106 @@ function log(message) {
     console.log(message)
 }
 
-function queryLlm(query, sendResponse) {
-    getProjectName(function (tabId, projectName) {
-        // If a project is opened but not mentioned add it to the query
-        if (projectName && query.indexOf(projectName) === -1) {
-            query += "\nThe project is " + projectName
-        }
+function queryLlm(url, query, sendResponse) {
+    getProjectNameFromUrl(url, function (projectName) {
+            // If a project is opened but not mentioned add it to the query
+            if (projectName && query.indexOf(projectName) === -1) {
+                query += "\nThe project is " + projectName
+            }
 
-        chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-                const url = new URL(tabs[0].url)
-                const space = tabs[0].url.split("/")[4]
+            const space = url.split("/")[4]
 
-                // We need two resources to continue:
-                // 1. The list of entities in the query
-                // 2. The WASM library
-                const promises = [
-                    fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-                        .then(response => {
-                            if (response.ok) {
-                                return response.json();
-                            }
-
-                            throw new Error('Something went wrong.');
-                        })
-                        // Enrich the entities with tenant IDs
-                        .then(entities => getTenantIds(url, space, entities.tenant_names)
-                            .then(tenantIds => {
-                                if (tenantIds && tenantIds.length > 0) {
-                                    entities.tenant_ids = tenantIds
-                                }
-                                return entities
-                            })),
-                    fetch("convert_project.wasm")
-                        .then(response => {
-                            if (response.ok) {
-                                return response.arrayBuffer();
-                            }
-
-                            throw new Error('Something went wrong.');
-                        })
-                        .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
-                ]
-
-                Promise.all(promises)
-                    .then(results => {
-                        const entities = results[0]
-                        const wasm = results[1]
-
-                        go.run(wasm.instance);
-
-                        log("URL and space")
-                        log(JSON.stringify(url.origin))
-                        log(JSON.stringify(space))
-
-                        const promises = getContext(url, space, entities, query)
-
-                        return Promise.all(promises)
-                    })
-                    .then(results => {
-                        const context = {"hcl": "", "json": "", "context": ""}
-                        results.forEach(result => {
-                            if (result.hcl) {
-                                if (context.hcl) {
-                                    context.hcl += "\n\n"
-                                }
-                                context.hcl += result.hcl
-                            }
-                            if (result.json) {
-                                if (context.json) {
-                                    context.json += "\n\n"
-                                }
-                                context.json += result.json
-                            }
-                            if (result.context) {
-                                if (context.context) {
-                                    context.context += "\n\n"
-                                }
-                                context.context += result.context
-                            }
-                        })
-
-                        log("Space Context")
-                        log(context)
-
-                        return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
-                            {
-                                method: "POST",
-                                body: JSON.stringify(context)
-                            })
-                    })
+            // We need two resources to continue:
+            // 1. The list of entities in the query
+            // 2. The WASM library
+            const promises = [
+                fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
                     .then(response => {
                         if (response.ok) {
-                            return response.text();
+                            return response.json();
                         }
 
                         throw new Error('Something went wrong.');
                     })
-                    .then(answer => sendResponse({answer: answer}))
-                    .catch(error => {
-                        sendResponse({answer: error.toString()})
+                    // Enrich the entities with tenant IDs
+                    .then(entities => getTenantIds(url, space, entities.tenant_names)
+                        .then(tenantIds => {
+                            if (tenantIds && tenantIds.length > 0) {
+                                entities.tenant_ids = tenantIds
+                            }
+                            return entities
+                        })),
+                fetch("convert_project.wasm")
+                    .then(response => {
+                        if (response.ok) {
+                            return response.arrayBuffer();
+                        }
+
+                        throw new Error('Something went wrong.');
                     })
-            }
-        )
-    })
+                    .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
+            ]
+
+            Promise.all(promises)
+                .then(results => {
+                    const entities = results[0]
+                    const wasm = results[1]
+
+                    go.run(wasm.instance);
+
+                    log("URL and space")
+                    log(JSON.stringify(url.origin))
+                    log(JSON.stringify(space))
+
+                    const promises = getContext(url, space, entities, query)
+
+                    return Promise.all(promises)
+                })
+                .then(results => {
+                    const context = {"hcl": "", "json": "", "context": ""}
+                    results.forEach(result => {
+                        if (result.hcl) {
+                            if (context.hcl) {
+                                context.hcl += "\n\n"
+                            }
+                            context.hcl += result.hcl
+                        }
+                        if (result.json) {
+                            if (context.json) {
+                                context.json += "\n\n"
+                            }
+                            context.json += result.json
+                        }
+                        if (result.context) {
+                            if (context.context) {
+                                context.context += "\n\n"
+                            }
+                            context.context += result.context
+                        }
+                    })
+
+                    log("Space Context")
+                    log(context)
+
+                    return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                        {
+                            method: "POST",
+                            body: JSON.stringify(context)
+                        })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+
+                    throw new Error('Something went wrong.');
+                })
+                .then(answer => sendResponse({answer: answer}))
+                .catch(error => {
+                    sendResponse({answer: error.toString()})
+                })
+        }
+    )
 }
 
 
@@ -755,7 +752,7 @@ function getContext(url, space, entities, query) {
     let forceAllProjects = false
 
     if (requiresReleaseHistory(query)) {
-        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names, entities.tenant_ids))
+        promises.push(...getReleaseHistory(url, space, entities.project_names, entities.environment_names, entities.tenant_ids, entities.dates))
 
         // If no projects or environments were mentioned, place all of them in context
         forceAllProjects = !entities.project_names || entities.project_names.length === 0
@@ -979,7 +976,7 @@ function getTenantIds(url, space, tenantNames) {
     return Promise.all(tenantIds)
 }
 
-function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds) {
+function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds, dates) {
     const promises = []
 
     if (!isEmptyArray(projectNames)) {
@@ -1022,6 +1019,17 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                         "Deployments": deployments["Items"]
                                             // Only capture releases to the environments we are interested in
                                             .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+                                            // Optionally limit results to the date range
+                                            .filter(deployment => {
+                                                if (dates && dates.length === 2) {
+                                                    const created = new Date(deployment["Created"])
+                                                    const date1 = new Date(dates[0])
+                                                    const date2 = new Date(dates[1])
+                                                    return created >= Math.min(date1, date2) && created <= Math.max(date1, date2)
+                                                }
+
+                                                return true
+                                            })
                                     }
                                 })
                         }))
@@ -1052,16 +1060,16 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                                 }
                                             })
                                     })
-                            })
+                                })
                         })
                         // Again convert the collection of promises to a promise returning a collection
-                        .then(releasesDeploymentsAndTasksPromises=> {
+                        .then(releasesDeploymentsAndTasksPromises => {
                             return Promise.all(releasesDeploymentsAndTasksPromises)
                         })
                         // From the flattened array, we create an "enriched" deployment object including the
                         // important information from the release, deployment, and task
                         .then(releasesDeploymentsAndTasks => {
-                            return  releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
+                            return releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
                                 return {
                                     "SpaceId": space,
                                     "ProjectId": releaseDeploymentAndTask["Release"]["ProjectId"],
@@ -1216,26 +1224,39 @@ function getLogs(logItem, depth) {
 function getProjectName(callback) {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
         try {
-            const url = new URL(tabs[0].url)
-            const urlSplit = tabs[0].url.split("/")
-
-            if (urlSplit.length >= 7 && urlSplit[5] === "projects") {
-                const space = urlSplit[4]
-                const projectSlug = urlSplit[6]
-
-                fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
-                    .then(response => response.json())
-                    .then(project => callback(tabs[0].id, project["Name"]))
-            }
-        } catch {
-            callback(null)
+            getProjectNameFromUrl(tabs[0].url, function(name) {
+                callback(tabs[0].id, name)
+            })
+        } catch (e) {
+            console.log(e)
+            callback(null, null)
         }
     })
 }
 
+function getProjectNameFromUrl(url, callback) {
+    try {
+        const urlSplit = url.split("/")
+
+        if (urlSplit.length >= 7 && urlSplit[5] === "projects") {
+            const space = urlSplit[4]
+            const projectSlug = urlSplit[6]
+
+            fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
+                .then(response => response.json())
+                .then(project => callback(project["Name"]))
+        } else {
+            callback(null)
+        }
+    } catch (e) {
+        console.log(e)
+        callback(null)
+    }
+}
+
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
-        queryLlm(request.query, sendResponse)
+        queryLlm(sender.url, request.query, sendResponse)
         return true
     }
 );

@@ -649,6 +649,7 @@ function queryLlm(url, query, sendResponse) {
                 query += "\nThe project is " + projectName
             }
 
+            const parsedUrl = new URL(url)
             const space = url.split("/")[4]
 
             // We need two resources to continue:
@@ -664,7 +665,7 @@ function queryLlm(url, query, sendResponse) {
                         throw new Error('Something went wrong.');
                     })
                     // Enrich the entities with tenant IDs
-                    .then(entities => getTenantIds(url, space, entities.tenant_names)
+                    .then(entities => getTenantIds(parsedUrl, space, entities.tenant_names)
                         .then(tenantIds => {
                             if (tenantIds && tenantIds.length > 0) {
                                 entities.tenant_ids = tenantIds
@@ -690,10 +691,10 @@ function queryLlm(url, query, sendResponse) {
                     go.run(wasm.instance);
 
                     log("URL and space")
-                    log(JSON.stringify(url.origin))
+                    log(JSON.stringify(parsedUrl.origin))
                     log(JSON.stringify(space))
 
-                    const promises = getContext(url, space, entities, query)
+                    const promises = getContext(parsedUrl, space, entities, query)
 
                     return Promise.all(promises)
                 })

@@ -951,8 +951,7 @@ function getEnvironmentId(host, spaceId, environmentName) {
 }
 
 function requiresReleaseHistory(query) {
-    return (query.toLowerCase().indexOf("deployment") !== -1 ||
-            query.toLowerCase().indexOf("deployed") !== -1 ||
+    return (query.toLowerCase().indexOf("deploy") !== -1 ||
             query.toLowerCase().indexOf("release") !== -1) &&
         query.toLowerCase().indexOf("log") === -1
 }

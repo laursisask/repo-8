@@ -643,105 +643,106 @@ function log(message) {
 }
 
 function queryLlm(query, sendResponse) {
-    getProjectName(function(tabId, projectName) {
+    getProjectName(function (tabId, projectName) {
         // If a project is opened but not mentioned add it to the query
         if (projectName && query.indexOf(projectName) === -1) {
             query += "\nThe project is " + projectName
         }
 
         chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-            const url = new URL(tabs[0].url)
-            const space = tabs[0].url.split("/")[4]
+                const url = new URL(tabs[0].url)
+                const space = tabs[0].url.split("/")[4]
 
-            // We need two resources to continue:
-            // 1. The list of entities in the query
-            // 2. The WASM library
-            const promises = [
-                fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
-                    .then(response => {
-                        if (response.ok) {
-                            return response.json();
-                        }
-
-                        throw new Error('Something went wrong.');
-                    })
-                    // Enrich the entities with tenant IDs
-                    .then(entities => getTenantIds(url, space, entities.tenant_names)
-                        .then(tenantIds => {
-                            if (tenantIds && tenantIds.length > 0) {
-                                entities.tenant_ids = tenantIds
+                // We need two resources to continue:
+                // 1. The list of entities in the query
+                // 2. The WASM library
+                const promises = [
+                    fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json();
                             }
-                            return entities
-                        })),
-                fetch("convert_project.wasm")
+
+                            throw new Error('Something went wrong.');
+                        })
+                        // Enrich the entities with tenant IDs
+                        .then(entities => getTenantIds(url, space, entities.tenant_names)
+                            .then(tenantIds => {
+                                if (tenantIds && tenantIds.length > 0) {
+                                    entities.tenant_ids = tenantIds
+                                }
+                                return entities
+                            })),
+                    fetch("convert_project.wasm")
+                        .then(response => {
+                            if (response.ok) {
+                                return response.arrayBuffer();
+                            }
+
+                            throw new Error('Something went wrong.');
+                        })
+                        .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
+                ]
+
+                Promise.all(promises)
+                    .then(results => {
+                        const entities = results[0]
+                        const wasm = results[1]
+
+                        go.run(wasm.instance);
+
+                        log("URL and space")
+                        log(JSON.stringify(url.origin))
+                        log(JSON.stringify(space))
+
+                        const promises = getContext(url, space, entities, query)
+
+                        return Promise.all(promises)
+                    })
+                    .then(results => {
+                        const context = {"hcl": "", "json": "", "context": ""}
+                        results.forEach(result => {
+                            if (result.hcl) {
+                                if (context.hcl) {
+                                    context.hcl += "\n\n"
+                                }
+                                context.hcl += result.hcl
+                            }
+                            if (result.json) {
+                                if (context.json) {
+                                    context.json += "\n\n"
+                                }
+                                context.json += result.json
+                            }
+                            if (result.context) {
+                                if (context.context) {
+                                    context.context += "\n\n"
+                                }
+                                context.context += result.context
+                            }
+                        })
+
+                        log("Space Context")
+                        log(context)
+
+                        return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                            {
+                                method: "POST",
+                                body: JSON.stringify(context)
+                            })
+                    })
                     .then(response => {
                         if (response.ok) {
-                            return response.arrayBuffer();
+                            return response.text();
                         }
 
                         throw new Error('Something went wrong.');
                     })
-                    .then(arrayBuffer => WebAssembly.instantiate(arrayBuffer, go.importObject))
-            ]
-
-        Promise.all(promises)
-            .then(results => {
-                const entities = results[0]
-                const wasm = results[1]
-
-                go.run(wasm.instance);
-
-                log("URL and space")
-                log(JSON.stringify(url.origin))
-                log(JSON.stringify(space))
-
-                const promises = getContext(url, space, entities, query)
-
-                return Promise.all(promises)
-            })
-            .then(results => {
-                const context = {"hcl": "", "json": "", "context": ""}
-                results.forEach(result => {
-                    if (result.hcl) {
-                        if (context.hcl) {
-                            context.hcl += "\n\n"
-                        }
-                        context.hcl += result.hcl
-                    }
-                    if (result.json) {
-                        if (context.json) {
-                            context.json += "\n\n"
-                        }
-                        context.json += result.json
-                    }
-                    if (result.context) {
-                        if (context.context) {
-                            context.context += "\n\n"
-                        }
-                        context.context += result.context
-                    }
-                })
-
-                log("Space Context")
-                log(context)
-
-                return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
-                    {
-                        method: "POST",
-                        body: JSON.stringify(context)
+                    .then(answer => sendResponse({answer: answer}))
+                    .catch(error => {
+                        sendResponse({answer: error.toString()})
                     })
-            })
-            .then(response => {
-                if (response.ok) {
-                    return response.text();
-                }
-
-                throw new Error('Something went wrong.');
-            })
-            .then(answer => sendResponse({answer: answer}))
-            .catch(error => {
-                sendResponse({answer: error.toString()})
-            })}
+            }
         )
     })
 }
@@ -982,38 +983,96 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
     const promises = []
 
     if (!isEmptyArray(projectNames)) {
-        // Look at the release history of each project
-        projectNames.forEach(projectName => {
-            const promise = getProjectId(url.origin, space, projectName)
-                .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
+        // Our task here is to get the release associated with a project, the deployments associated with a release,
+        // filter the deployments to the environments in question, get the task associated with the deployment,
+        // and return a flattened array of deployments information that contains all the associated details
+        // of the release and task.
+        // This involves many API calls, and thus resolving many promises as we work down the tree collecting
+        // all the required information.
 
-                    throw new Error('Something went wrong.');
-                })
-                .then(release => stripLinks(release))
-                .then(releases => {
-                    const deployments = releases["Releases"].flatMap(release => {
-                        return Object.values(release["Deployments"])
-                    }).flat()
-
-                    const environmentIds = releases["Environments"]
-                        .filter(environment => {
-                            return environmentNames && environmentNames.indexOf(environment["Name"]) !== -1
+        // Start by getting a list of environment IDs that match the supplied environment names
+        const promise = fetch(`${url.origin}/api/${space}/Environments?take=10000`)
+            .then(response => response.json())
+            .then(environments => {
+                return environmentNames.map(environmentName => environments["Items"]
+                    .filter(env => env["Name"] === environmentName)
+                    .map(env => env["Id"])
+                    .pop())
+            })
+            // Once we have our list of environments, we can get the releases for a project
+            .then(environmentIds => {
+                // Look at the release history of each project
+                return projectNames.map(projectName => {
+                    const releasePromise = getProjectId(url.origin, space, projectName)
+                        .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Releases?take=20`))
+                        .then(response => response.json())
+                        // For every release, get the deployments that belong to the environments we are interested in
+                        .then(releases => releases["Items"].map(release => {
+                            return fetch(`${url.origin}/api/${space}/Releases/${release["Id"]}/Deployments`)
+                                .then(response => response.json())
+                                .then(deployments => {
+                                    return {
+                                        "Release": release,
+                                        "Deployments": deployments["Items"]
+                                            // Only capture releases to the environments we are interested in
+                                            .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+                                    }
+                                })
+                        }))
+                        // Convert the collection of promises to a single promise returning a collection
+                        .then(releasesAndDeploymentsPromises => {
+                            return Promise.all(releasesAndDeploymentsPromises)
                         })
-                        .map(environment => environment["Id"])
-
-                    const filtered = deployments
-                        .filter(deployment => isEmptyArray(environmentIds) || environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
-                        .filter(deployment => isEmptyArray(tenantIds) || tenantIds.indexOf(deployment["TenantId"]) !== -1)
-
-                    const subset = filtered.slice(0, 20)
-                    return {"json": JSON.stringify({"Deployments": subset}, null, 2)}
+                        .then(releasesAndDeployments => {
+                            return releasesAndDeployments
+                                // We're only interested in releases that have deployments to the environments we are interested in
+                                .filter(releaseAndDeployments => releaseAndDeployments["Deployments"].length !== 0)
+                                // get the task associated with each deployment associated with each release
+                                .flatMap(releaseAndDeployments => {
+                                    return releaseAndDeployments["Deployments"].map(deployment => {
+                                        return fetch(`${url.origin}/api/${space}/Tasks/${deployment["TaskId"]}`)
+                                            .then(response => response.json())
+                                            .then(task => {
+                                                // We return a flattened array containing the release, deployment and task
+                                                return {
+                                                    "Release": releaseAndDeployments["Release"],
+                                                    "Deployment": deployment,
+                                                    "Task": task
+                                                }
+                                            })
+                                    })
+                            })
+                        })
+                        // Again convert the collection of promises to a promise returning a collection
+                        .then(releasesDeploymentsAndTasksPromises=> {
+                            return Promise.all(releasesDeploymentsAndTasksPromises)
+                        })
+                        // From the flattened array, we create an "enriched" deployment resources including the
+                        // important information from the release, deployment, and task
+                        .then(releasesDeploymentsAndTasks => {
+                            return releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
+                                return {
+                                    "SpaceId": space,
+                                    "ProjectId": releaseDeploymentAndTask["Release"]["ProjectId"],
+                                    "ReleaseVersion": releaseDeploymentAndTask["Release"]["Version"],
+                                    "DeploymentId": releaseDeploymentAndTask["Deployment"]["Id"],
+                                    "TaskId": releaseDeploymentAndTask["Deployment"]["TaskId"],
+                                    "TenantId": releaseDeploymentAndTask["Deployment"]["TenantId"],
+                                    "ReleaseId": releaseDeploymentAndTask["Deployment"]["ReleaseId"],
+                                    "EnvironmentId": releaseDeploymentAndTask["Deployment"]["EnvironmentId"],
+                                    "ChannelId": releaseDeploymentAndTask["Deployment"]["ChannelId"],
+                                    "Created": releaseDeploymentAndTask["Deployment"]["Created"],
+                                    "TaskState": releaseDeploymentAndTask["Task"]["State"],
+                                    "TaskDuration": releaseDeploymentAndTask["Task"]["Duration"],
+                                    "ReleaseNotes": stripMarkdownUrls(releasesAndDeployment["Release"]["ReleaseNotes"]),
+                                    "DeployedBy": releasesAndDeployment["Deployment"]["DeployedBy"],
+                                }
+                            })
+                        })
                 })
+            })
+
             promises.push(promise)
-        })
     } else {
         // Look at the dashboard for a global view
         const promise = fetch(`${url.origin}/api/${space}/Dashboard`)
@@ -1174,7 +1233,7 @@ chrome.action.onClicked.addListener((tab) => {
                 target: {tabId: tab.id},
                 files: ['style.css']
             });
-            getProjectName(function(tabId, projectName){
+            getProjectName(function (tabId, projectName) {
                 if (projectName) {
                     chrome.tabs.sendMessage(tabId, {project: projectName})
                 }

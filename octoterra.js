@@ -1003,13 +1003,19 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
             .then(environmentIds => {
                 // Look at the release history of each project
                 return projectNames.map(projectName => {
+                    // Each project is converted to an ID
                     return getProjectId(url.origin, space, projectName)
+                        // The releases associated with each project are returned
                         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Releases?take=20`))
+                        // Responses are converted from JSON
                         .then(response => response.json())
                         // For every release, get the deployments that belong to the environments we are interested in
                         .then(releases => releases["Items"].map(release => {
+                            // This returns the list of deployments associated with a release
                             return fetch(`${url.origin}/api/${space}/Releases/${release["Id"]}/Deployments`)
+                                // Responses are converted from JSON
                                 .then(response => response.json())
+                                // We need to keep a hold of the release and the deployments
                                 .then(deployments => {
                                     return {
                                         "Release": release,
@@ -1023,15 +1029,20 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                         .then(releasesAndDeploymentsPromises => {
                             return Promise.all(releasesAndDeploymentsPromises)
                         })
+                        // Every deployment needs to have the details of the task attached, which we do in this callback
                         .then(releasesAndDeployments => {
                             return releasesAndDeployments
                                 // We're only interested in releases that have deployments to the environments we are interested in
                                 .filter(releaseAndDeployments => releaseAndDeployments["Deployments"].length !== 0)
                                 // get the task associated with each deployment associated with each release
                                 .flatMap(releaseAndDeployments => {
+                                    // Map each deployment into an object containing the release, deployment, and task
                                     return releaseAndDeployments["Deployments"].map(deployment => {
+                                        // This returns the deployment task
                                         return fetch(`${url.origin}/api/${space}/Tasks/${deployment["TaskId"]}`)
+                                            // Responses are converted from JSON
                                             .then(response => response.json())
+                                            // Build a new object capturing the release, deployment, and task
                                             .then(task => {
                                                 // We return a flattened array containing the release, deployment and task
                                                 return {
@@ -1047,7 +1058,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                         .then(releasesDeploymentsAndTasksPromises=> {
                             return Promise.all(releasesDeploymentsAndTasksPromises)
                         })
-                        // From the flattened array, we create an "enriched" deployment resources including the
+                        // From the flattened array, we create an "enriched" deployment object including the
                         // important information from the release, deployment, and task
                         .then(releasesDeploymentsAndTasks => {
                             return  releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
@@ -1071,6 +1082,8 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                         })
                 })
             })
+            // We now have an array of promises, one for each project returning it's enriched deployment objects.
+            // We convert this array of promises into a single promise returning a collection of results.
             .then(promises => Promise.all(promises))
             .then(results => {
                 // We have an array containing arrays of deployments for each project.

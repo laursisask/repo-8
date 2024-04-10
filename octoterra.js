@@ -1003,7 +1003,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
             .then(environmentIds => {
                 // Look at the release history of each project
                 return projectNames.map(projectName => {
-                    const releasePromise = getProjectId(url.origin, space, projectName)
+                    return getProjectId(url.origin, space, projectName)
                         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Releases?take=20`))
                         .then(response => response.json())
                         // For every release, get the deployments that belong to the environments we are interested in
@@ -1050,7 +1050,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                         // From the flattened array, we create an "enriched" deployment resources including the
                         // important information from the release, deployment, and task
                         .then(releasesDeploymentsAndTasks => {
-                            return releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
+                            return  releasesDeploymentsAndTasks.map(releaseDeploymentAndTask => {
                                 return {
                                     "SpaceId": space,
                                     "ProjectId": releaseDeploymentAndTask["Release"]["ProjectId"],
@@ -1068,8 +1068,14 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                     "DeployedBy": releaseDeploymentAndTask["Deployment"]["DeployedBy"],
                                 }
                             })
+
+
                         })
                 })
+            })
+            .then(promises => Promise.all(promises))
+            .then(results => {
+                return {"json": JSON.stringify({"Deployments": results.flatMap(result => result)}, null, 2)}
             })
 
         promises.push(promise)

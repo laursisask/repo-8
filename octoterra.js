@@ -1019,7 +1019,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                                         "Release": release,
                                         "Deployments": deployments["Items"]
                                             // Only capture releases to the environments we are interested in
-                                            .filter(deployment => environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
+                                            .filter(deployment => environmentIds.length === 0 || environmentIds.indexOf(deployment["EnvironmentId"]) !== -1)
                                             // Optionally limit results to the date range
                                             .filter(deployment => {
                                                 if (dates && dates.length === 2) {
@@ -1237,13 +1237,14 @@ function getProjectName(callback) {
 
 function getProjectNameFromUrl(url, callback) {
     try {
+        const parsedUrl = new URL(url)
         const urlSplit = url.split("/")
 
         if (urlSplit.length >= 7 && urlSplit[5] === "projects") {
             const space = urlSplit[4]
             const projectSlug = urlSplit[6]
 
-            fetch(`${url.origin}/api/${space}/Projects/${projectSlug}`)
+            fetch(`${parsedUrl.origin}/api/${space}/Projects/${projectSlug}`)
                 .then(response => response.json())
                 .then(project => callback(project["Name"]))
         } else {

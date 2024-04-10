@@ -925,6 +925,26 @@ function getProjectId(host, spaceId, projectName) {
         })
 }
 
+function getProjectIdFuzzy(host, spaceId, projectName) {
+    return fetch(`${host}/api/${spaceId}/Projects?take=10000`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
+        .then(json => {
+            const projects = json["Items"].map(item => {return {"item": item, "score": levenshteinDistance(item["Name"], projectName)}})
+                .sort((a, b) => a["score"] - b["score"])
+            if (projects.length > 0) {
+                return projects[0]["item"]["Id"]
+            }
+
+            throw "Could not find project " + projectName
+        })
+}
+
 function getEnvironmentId(host, spaceId, environmentName) {
     return fetch(`${host}/api/${spaceId}/Environments?partialName=${encodeURIComponent(environmentName)}&take=10000`)
         .then(response => {
@@ -935,14 +955,34 @@ function getEnvironmentId(host, spaceId, environmentName) {
             throw new Error('Something went wrong.');
         })
         .then(json => {
-            const projects = json["Items"].filter(item => item["Name"].toLowerCase() === environmentName.toLowerCase())
-            if (projects.length === 1) {
-                return projects[0]["Id"]
-            } else if (projects.length > 1) {
-                const projectEntity = projects.filter(item => item["Name"] === environmentName).pop()
-                if (projectEntity) {
-                    return projectEntity["Id"]
+            const environments = json["Items"].filter(item => item["Name"].toLowerCase() === environmentName.toLowerCase())
+            if (environments.length === 1) {
+                return environments[0]["Id"]
+            } else if (environments.length > 0) {
+                const environmentEntity = environments.filter(item => item["Name"] === environmentName).pop()
+                if (environmentEntity) {
+                    return environmentEntity["Id"]
                 }
+            }
+
+            throw "Could not find environment " + environmentName
+        })
+}
+
+function getEnvironmentIdFuzzy(host, spaceId, environmentName) {
+    return fetch(`${host}/api/${spaceId}/Environments?take=10000`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+
+            throw new Error('Something went wrong.');
+        })
+        .then(json => {
+            const environments = json["Items"].map(item => {return {"item": item, "score": levenshteinDistance(item["Name"], environmentName)}})
+                .sort((a, b) => a["score"] - b["score"])
+            if (environments.length > 0) {
+                return environments[0]["item"]["Id"]
             }
 
             throw "Could not find environment " + environmentName
@@ -1003,6 +1043,7 @@ function getReleaseHistory(url, space, projectNames, environmentNames, tenantIds
                 return projectNames.map(projectName => {
                     // Each project is converted to an ID
                     return getProjectId(url.origin, space, projectName)
+                        .catch(() => getProjectIdFuzzy(url.origin, space, projectName))
                         // The releases associated with each project are returned
                         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Releases?take=20`))
                         // Responses are converted from JSON
@@ -1150,6 +1191,7 @@ function requiresReleaseLogs(query, projectNames) {
 
 function getReleaseLogs(url, space, projectName, environmentName, tenantIds, release_version) {
     return getProjectId(url.origin, space, projectName)
+        .catch(() => getProjectIdFuzzy(url.origin, space, projectName))
         .then(projectId => fetch(`${url.origin}/api/${space}/Projects/${projectId}/Progression`))
         .then(response => {
             if (response.ok) {
@@ -1166,6 +1208,7 @@ function getReleaseLogs(url, space, projectName, environmentName, tenantIds, rel
             // If an environment was mentioned, limit the deployments to the target environment
             if (environmentName) {
                 return getEnvironmentId(url.origin, space, environmentName)
+                    .catch(() => getEnvironmentIdFuzzy(url.origin, space, environmentName))
                     .then(environmentId => {
                         const releases = progression["Releases"].filter(release => Object.keys(release["Deployments"]).indexOf(environmentId) !== -1)
 
@@ -1254,6 +1297,26 @@ function getProjectNameFromUrl(url, callback) {
         console.log(e)
         callback(null)
     }
+}
+
+const levenshteinDistance = (s, t) => {
+    if (!s.length) return t.length;
+    if (!t.length) return s.length;
+    const arr = [];
+    for (let i = 0; i <= t.length; i++) {
+        arr[i] = [i];
+        for (let j = 1; j <= s.length; j++) {
+            arr[i][j] =
+                i === 0
+                    ? j
+                    : Math.min(
+                        arr[i - 1][j] + 1,
+                        arr[i][j - 1] + 1,
+                        arr[i - 1][j - 1] + (s[j - 1] === t[i - 1] ? 0 : 1)
+                    );
+        }
+    }
+    return arr[t.length][s.length];
 }
 
 chrome.runtime.onMessage.addListener(

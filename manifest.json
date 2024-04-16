@@ -11,7 +11,7 @@
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
   "host_permissions": [
-    "https://octopuscopilotproduction.azurewebsites.net/*"
+    "https://octopusai-f3adanckatdqedfh.a02.azurefd.net/*"
   ],
   "permissions": [
     "activeTab",

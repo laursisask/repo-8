@@ -633,6 +633,7 @@ const error = "An exception was thrown. If you are using this extension in early
     + "If you are using the extension in late 2024, this extension is likely deprecated."
 const go = new Go();
 const MAX_CHARS = 13500 * 4
+const AIAgentUrl = "https://octopusai-f3adanckatdqedfh.a02.azurefd.net"
 
 function is_empty_array(array) {
     return typeof array === 'undefined' || array === null || array.length === 0
@@ -656,7 +657,7 @@ function queryLlm(url, query, sendResponse) {
             // 1. The list of entities in the query
             // 2. The WASM library
             const promises = [
-                fetch("https://octopuscopilotproduction.azurewebsites.net/api/query_parse?message=" + encodeURIComponent(query))
+                fetch(AIAgentUrl + "/api/query_parse?message=" + encodeURIComponent(query))
                     .then(response => {
                         if (response.ok) {
                             return response.json();
@@ -724,7 +725,7 @@ function queryLlm(url, query, sendResponse) {
                     log("Space Context")
                     log(context)
 
-                    return fetch("https://octopuscopilotproduction.azurewebsites.net/api/submit_query?message=" + encodeURIComponent(query),
+                    return fetch(AIAgentUrl + "/api/submit_query?message=" + encodeURIComponent(query),
                         {
                             method: "POST",
                             body: JSON.stringify(context)

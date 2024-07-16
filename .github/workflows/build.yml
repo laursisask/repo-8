@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "go.mod"
+      - "go.sum"
+      - "**/*.go"
+      - "Dockerfile"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "go.mod"
+      - "go.sum"
+      - "**/*.go"
+      - "Dockerfile"
+      - ".github/workflows/build.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - id: push-to-gar
+        uses: grafana/shared-workflows/actions/push-to-gar-docker@main
+        with:
+          tags: |-
+            type=raw,value=latest
+            type=raw,value={{branch}}-{{sha}},enable=${{ github.event_name == 'push' && 'true' || 'false' }}
+          image_name: "github-rate-limit-prometheus-exporter"
+          environment: ${{ github.event_name == 'pull_request' && 'dev' || 'prod' }}
+          push: ${{ github.event_name != 'pull_request' }}

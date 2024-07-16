@@ -35,6 +35,9 @@ jobs:
           tags: |-
             type=raw,value=latest
             type=raw,value={{branch}}-{{sha}},enable=${{ github.event_name == 'push' && 'true' || 'false' }}
+          platforms: |-
+            linux/amd64
+            linux/arm64
           image_name: "github-rate-limit-prometheus-exporter"
           environment: ${{ github.event_name == 'pull_request' && 'dev' || 'prod' }}
           push: ${{ github.event_name != 'pull_request' }}

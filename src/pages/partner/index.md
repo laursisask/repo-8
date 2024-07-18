@@ -19,7 +19,7 @@ In this guide, the following terms will be used.
 
 | Glossary Term      | Definition                                                                                                                                                                                                                                   |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Org**            | An enterprise that’s using Adobe products and services for globalization workflows.                                                                                                                                                          |
+| **Org**            | An enterprise that's using Adobe products and services for globalization workflows.                                                                                                                                                          |
 | **IMS Token**      | An Identity Management System (IMS) token for the user in an organization that allows them to be authenticated by Adobe. These users can then use the services and products to which the org is entitled.                                    |
 | **User**           | The end user in the Org who triggers the localization workflow. The user can trigger a task for localization, preview and approve a localized task.                                                                                          |
 | **Partner**        | Localization partner that the Org wants to work with. Partner might have an offline selection with Adobe. Once the contracts are signed, partner is authorized into the Globalization Content Service through the Adobe I/O.                 |
@@ -51,7 +51,7 @@ The following workflow diagram describes the steps in the partner registration p
 
 # Partner Onboarding: The Complete Workflow
 
-Here’s your guide to onboarding on the Adobe I/O console and accessing the Globalization Content Service APIs.
+Here's your guide to onboarding on the Adobe I/O console and accessing the Globalization Content Service APIs.
 
 ## Login
 
@@ -134,12 +134,10 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
    ![Add Globalization Content Service Events](resources/ss_Add_Events_GCS.png)
 
-6. The **Configure event registration** screen shows four events that you can subscribe.
+6. The **Configure event registration** screen shows two events that you can subscribe.
 
-   1. **LEVERAGE_TM**: Used to extract text for localization out of an Adobe asset. Also, access the translation memory (TM) to enable the optimum re-use of a previously translated content.
-   2. **PROJECT_UPDATE**: Used to update the project configuration information. The configuration data can include info on locales, content provider system and so on.
-   3. **TRANSLATE**: Used to trigger an event when a task is sent for localization.
-   4. **UPDATE_TM**: Used to update the translation memory. During the asset completion of manual translation, translated strings are saved in TM so that they can be used later if similar strings appear in a future task. It helps to reduce the cost of manual translation.
+   1. **TRANSLATE**: Used to trigger an event when a task is sent for localization.
+   2. **RE TRANSLATE**: Used to trigger an event when asset is rejected sent back for localization.
 
    ![Configure events](resources/ss_Configure_event_registration.png)
 
@@ -154,13 +152,13 @@ Here’s your guide to onboarding on the Adobe I/O console and accessing the Glo
 
     ![Event registration details](resources/ss_Event_registration_details_1.png)
 
-10. Notice that **Journaling** is selected in **How to receive events** section. Adobe’s journaling APIs work as a ledger recording all events for a specified time. Developers like you can create your own configuration to access the Adobe Journaling APIs and access events.
+10. Notice that **Journaling** is selected in **How to receive events** section. Adobe's journaling APIs work as a ledger recording all events for a specified time. Developers like you can create your own configuration to access the Adobe Journaling APIs and access events.
 
     ![Event registration details - journaling selected](resources/ss_Configure_event_registration_3.png)
 
 11. Select **Save Configured events.**
 
-    You get a message, “Your webhook is created successfully”.
+    You get a message, "Your webhook is created successfully".
 
     Next, you see a summary screen where your journaling end point is confirmed.
 
@@ -386,23 +384,42 @@ Based on your operation, you can get the following response types.
 
    Now use [Get Asset API](../api/index.md#get-all-asset-api) to fetch assets. Go ahead and localize them. Next, update the assets with [Put Asset API](../api/index.md#get-all-asset-api#update-asset-and-initiate-asset-complete-api).
 
-1. **204 No Content**: No event is returned. You might have already reached the end of the journal. You will get a 200 OK response in a subsequent poll provided a new event is added in the journal at the client’s end.
+1. **204 No Content**: No event is returned. You might have already reached the end of the journal. You will get a 200 OK response in a subsequent poll provided a new event is added in the journal at the client's end.
 
 # Globalization Content Service Reference
 
 ## Event
 
-A typical event will have the following information.
+A typical event with event code **TRANSLATE** will have the following information.
 
 ```java
-{ 
-"orgId": "30F7..30A494004@AdobeOrg", 
-"projectId": "StageTest1", 
-"taskId": "TestTask1214_2", 
-"sourceLocale": "en-US", 
-"translationProviderOrgId": "5BD8..0A494114@AdobeOrg", 
-"targetLocale": "ja-JP", 
-"eventCode": "TRANSLATE"
+ {
+     "eventCode": "TRANSLATE",
+     "tenantId": "906E3A095D....30A495FD6@AdobeOrg_AJO_prod",
+     "orgId": "906E3A095....230A495FD6@AdobeOrg",
+     "projectId": "HT-Test1",
+     "taskId": "HT_240717_1",
+     "sourceLocale": "en-US",
+     "translationProviderOrgId": "988120836....DE0A495C5D@AdobeOrg",
+     "targetLocale": "ja-JP",
+     "url": "https://dummy-url-1.adobe.com"
+    }
+```
+
+A typical event with event code **RE_TRANSLATE** will have the following information.
+
+```java
+{
+ "eventCode": "RE_TRANSLATE",
+ "tenantId": "745F37C35E4B....49421B@AdobeOrg_AJO_prod",
+ "orgId": "745F37C35E4B....49421B@AdobeOrg",
+ "projectId": "7b8ed7e5-b25c-4694-90e3-92eaab8b76f4",
+ "taskId": "HT_9f1954ac-c56c-489c-83b8-3e656a9b73e5",
+ "sourceLocale": "en-US",
+ "translationProviderOrgId": "5BD819C5....00A494114@AdobeOrg",
+ "targetLocale": "fr-FR",
+ "assetName": "email_body_from_ajo.html",
+ "assetUrl": https://gcsstorage1.blob.core.windows.net/gcsdev1/745F37C35E4B....49421B@AdobeOrg_AJO_prod/7b8ed7e5-b25c-4....3D&se=2024-05-03T23%3A49%3A13Z&sv=2019-02-02&sp=r&sr=b
 }
 ```
 
@@ -410,13 +427,15 @@ You can configure the following:
 
 1. Define the **event code**: Trigger an event when the following action occurs:
    1. **Translate**: Send an asset for localization
-   2. **Project update:** Update the project configuration in the localization provider system.
-   3. **Leverage**: Leverage an asset and get the content to be localized in a Xliff format.
-   4. **Update**: Receive the localized task back. Update starts a workflow to convert the translated Xliff into the localized asset in the source format and returns it to the content system
-2. Specify the **Organization Id**: The unique ID of the customer’s org initiating localization
-3. Define the **project name** and **task name**.
-4. Set the **source locale**
-5. Connect the **translation provider ID**
+   2. **Re-Translate:** Reject an asset locale and send it back for localization.
+
+2. Specify the **Tenant Id**: The unique ID of the tenant within a customer org initiating localization.
+3. Specify the **Organization Id**: The unique ID of the customer's org.
+4. Define the **project id** and **task id**.
+5. Set the **source locale** and **target locale**
+6. **assetName** is the name of the rejected asset.
+7. **assetUrl** is the individual URL of the rejected asset with reviewer's comments.
+8. **translation provider ID** is the org id of the provider.
 
 ## Sample Acess Token
 
@@ -424,7 +443,7 @@ A sample access_token response from IMS is displayed below.
 
 ```java
 {
-    "access_token": "eyJhbGciOiJSUzI1NiIsIng1dSI6Imltc19uYTEtc3RnMS1rZXktYXQtMS5jZXIiLCJraWQiOiJpbXNfbmExLXN0ZzEta2V5LWF0LTEiLCJpdHQiOiJhdCJ9.eyJpZCI6IjE2OTU4OTQ3NTYwOTdfYWYyMWQ2OTktNzkwNy00NjNmLThhOTktODk5Njc3OTUxNTE3X2V3MSIsIm9yZyI6IjM1QTk0M0MwNjJEQTY0MTEwQTQ5NDIzN0BBZG9iZU9yZyIsInR5cGUiOiJhY2Nlc3NfdG9rZW4iLCJjbGllbnRfaWQiOiIyYmIyZmViMGZkZWM0ZmRlODk1MTY0NGJhNzcwZTMyOSIsInVzZXJfaWQiOiI3OTlCMUE5MjY1MDJFNEM1MEE0OTQwMDlAdGVjaGFjY3QuYWRvYmUuY29tIiwiYXMiOiJpbXMtbmExLXN0ZzEiLCJhYV9pZCI6Ijc5OUIxQTkyNjUwMkU0QzUwQTQ5NDAwOUB0ZWNoYWNjdC5hZG9iZS5jb20iLCJjdHAiOjMsIm1vaSI6IjcwNTg2OWI3IiwiZXhwaXJlc19pbiI6Ijg2NDAwMDAwIiwiY3JlYXRlZF9hdCI6IjE2OTU4OTQ3NTYwOTciLCJzY29wZSI6ImFkb2JlaW9fYXBpLG9wZW5pZCxyZWFkX2NsaWVudF9zZWNyZXQsQWRvYmVJRCxhZGRpdGlvbmFsX2luZm8ucm9sZXMsbWFuYWdlX2NsaWVudF9zZWNyZXRzLHJlYWRfb3JnYW5pemF0aW9ucyxhZGRpdGlvbmFsX2luZm8ucHJvamVjdGVkUHJvZHVjdENvbnRleHQifQ.g3eBFADKN6q9gxMiiAL53MxM7FQGDO3LSahtpcp2E7irEJ6xWjrhc28rFEFoZZc3rRBDWiUqGj2faVopUZmNZ0HbKl-QcXfM9yYRzsBm9y8Zw91RbvieNU1MqxkYbCS-TzcFBAgGGPcdyyWylT_2WgAIUiXI9K5CyR2tRaScqwFhAS8S371AA7Hq3QMyJUGwZwqxYMbfKy2jh1ZNYyCLkRHXMwl2FUNgjk2pQiOnetbSsI0muxwu_cOoE8i6A9TA8CY4vZ22zSCCaQXXeKG2jGB1qGEz1CaRCEutYPcY-Lxx1YwvN73L7nrLR8_yZ5_2MKK_fm9VjhmViQHgsQ",
+    "access_token": "eyJhbGciOiJSUzI1NiIsIng1dSI6Imltc19uYTEtc3RnMS1rZXktYXQtMS5jZXIiLCJraWQiOiJpbXNfbmExLXN0ZzEta2V5LWF0LTEiLCJpdHQiOiJhdCJ9............-QcXfM9yYRzsBm9y8Zw91RbvieNU1MqxkYbCS-Lxx1YwvN73L7nrLR8_yZ5_2MKK_fm9VjhmViQHgsQ",
     "token_type": "bearer",
     "expires_in": 86399
 }

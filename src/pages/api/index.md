@@ -5,10 +5,10 @@ What do you want to understand today?
 1. [Overview of Globalization Content Service APIs](#overview)
 2. [APIs for Globalization Partners](#apis-for-globalization-partners)
 3. [Get All Assets API](#get-all-assets-api)
-4. [Download Individual Asset](#download-asset-api)
-5. [Manual Translation of Downloaded Asset](#mt-download-asset-api)
-6. [Upload Translated xliff to GCS Azure Storage](#upload-asset-api)
-7. [Initiate Asset Locale Completion in GCS](#complete-asset-api)
+4. [Download Individual Asset](#download-individual-asset)
+5. [Manual Translation of Downloaded Asset](#manual-translation-of-downloaded-asset)
+6. [Upload Translated xliff to GCS Azure Storage](#upload-translated-xliff-to-gcs-azure-storage)
+7. [Initiate Asset Locale Completion in GCS](#initiate-asset-locale-completion-in-gcs)
 8. [Cancel Individual Asset API](#cancel-individual-asset-api)
 
 ## Overview
@@ -54,11 +54,11 @@ Register to Globalization Content Service and setup a task polling framework/con
 
 These include:
 
-- [Get all assets for the project](#get-all-assets-api)
-- [Download Individual Asset](#download-asset-api)
-- [Manual Translation of Downloaded Asset](#mt-download-asset-api)
-- [Upload Translated xliff to GCS Azure Storage](#upload-asset-api)
-- [Initiate Asset Locale Completion in GCS](#complete-asset-api)
+- [Get all assets for the project](#get-all-assets-for-the-project)
+- [Download Individual Asset](#download-individual-asset)
+- [Manual Translation of Downloaded Asset](#manual-translation-of-downloaded-asset)
+- [Upload Translated xliff to GCS Azure Storage](#upload-translated-xliff-to-gcs-azure-storage)
+- [Initiate Asset Locale Completion in GCS](#initiate-asset-locale-completion-in-gcs)
 - [Cancel Individual Asset API](#cancel-individual-asset-api)
 
 [](#_Update_Service_Provider_1)In the section below, you will learn about these APIs.

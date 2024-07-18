@@ -382,7 +382,7 @@ Based on your operation, you can get the following response types.
 
 1. **200 OK**: Successful operation and the list of events are added in the response body. To see a typical event, click [here](#event).
 
-   Now use [Get Asset API](../api/index.md#get-all-asset-api) to fetch assets. Go ahead and localize them. Next, update the assets with [Put Asset API](../api/index.md#get-all-asset-api#update-asset-and-initiate-asset-complete-api).
+   Now use [Get Asset API](../api/index.md#get-all-assets-api) to fetch assets. Go ahead and localize them. Next, update the assets with [Put Asset API](../api/index.md#get-all-assets-api#update-asset-and-initiate-asset-complete-api).
 
 1. **204 No Content**: No event is returned. You might have already reached the end of the journal. You will get a 200 OK response in a subsequent poll provided a new event is added in the journal at the client's end.
 

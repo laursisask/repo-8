@@ -294,14 +294,10 @@ public class SampleConsumer extends Thread {
             String eventCode = gcsMsgNode.get(KEY_EVENT_CODE).asText();
             String gcsMsg = mapper.writeValueAsString(gcsMsgNode);
             logger.info("EventCode: {}, Message consumed:{}", eventCode, gcsMsg);
-            if (PROJECT_UPDATE.equalsIgnoreCase(eventCode)) {
-              // Call project update api to update project configuration in Provider system
-            } else if (UPDATE_TM.equalsIgnoreCase(eventCode)) {
-              // Call updateTM api to update translation memory
-            } else if (LEVERAGE_TM.equalsIgnoreCase(eventCode)) {
-              // Call leveraging api to leverage translation task
-            } else if (TRANSLATE.equalsIgnoreCase(eventCode)) {
+            if (TRANSLATE.equalsIgnoreCase(eventCode)) {
               // Call translation api to make the task available to vendor
+            } else if (RE_TRANSLATE.equalsIgnoreCase(eventCode)) {
+              // Call re-translation api to make the task available to vendor
             }
             nextUrl = getNextUrl(linkHeaders, nextUrl);
           }

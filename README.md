@@ -5,13 +5,15 @@ already exist.
 
 ## atlassian-forge
 
-This install the
+This installs the
 [Atlassian Forge CLI](https://developer.atlassian.com/platform/forge/cli-reference)
 globally via npm.
 
+**Example devcontainer.json:**
 ```json
 {
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
   "features": {
     "ghcr.io/adaptavist/devcontainer-features/atlassian-forge:1": {
       "version": "latest"
@@ -20,8 +22,8 @@ globally via npm.
 
   "containerEnv": {
     "FORGE_API_TOKEN": "${localEnv:FORGE_API_TOKEN}",
-		"FORGE_EMAIL": "${localEnv:FORGE_EMAIL}"
-	}
+    "FORGE_EMAIL": "${localEnv:FORGE_EMAIL}"
+  }
 }
 ```
 

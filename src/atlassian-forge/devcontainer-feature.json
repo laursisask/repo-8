@@ -1,0 +1,18 @@
+{
+  "id": "atlassian-forge",
+  "version": "1.0.0",
+  "name": "Atlassian Forge CLI (via npm)",
+  "description": "A command-line tool for building Atlassian Forge apps.",
+  "options": {
+    "version": {
+      "default": "latest",
+      "description": "Select the version to install.",
+      "proposals": ["latest"],
+      "type": "string"
+    }
+  },
+  "dependsOn": {
+      "ghcr.io/devcontainers/features/node": {}
+  },
+  "postStartCommand": "forge settings set usage-analytics false"
+}

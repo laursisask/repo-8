@@ -33,8 +33,7 @@ jobs:
     strategy:
       matrix:
         features:
-          - color
-          - hello
+          - atlassian-forge
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +51,3 @@ jobs:
 
       - name: "Install latest devcontainer CLI"
         run: npm install -g @devcontainers/cli
-
-      - name: "Testing global scenarios"
-        run: devcontainer features test --global-scenarios-only .

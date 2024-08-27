@@ -6,7 +6,7 @@ already exist.
 ## atlassian-forge
 
 This install the
-(Atlassian Forge CLI)[https://developer.atlassian.com/platform/forge/cli-reference]
+[Atlassian Forge CLI](https://developer.atlassian.com/platform/forge/cli-reference)
 globally via npm.
 
 ```json
@@ -26,7 +26,7 @@ globally via npm.
 ```
 
 You'll need to login to forge, which can be done manually within the container
-using (forge login)[https://developer.atlassian.com/platform/forge/cli-reference/login],
+using [forge login](https://developer.atlassian.com/platform/forge/cli-reference/login),
 or you can set `FORGE_API_TOKEN` and `FORGE_EMAIL` locally (to be inherited by
 the container).
 

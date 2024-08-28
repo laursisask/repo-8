@@ -17,7 +17,8 @@ globally via npm.
   "features": {
     "ghcr.io/adaptavist/devcontainer-features/atlassian-forge:1": {
       "version": "latest"
-    }
+    },
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "containerEnv": {
@@ -37,3 +38,9 @@ To check your login:
 ```sh
 $ forge whoami
 ```
+
+If you want to make use of
+[forge tunnel](https://developer.atlassian.com/platform/forge/tunneling),
+you'll need to add the *docker-in-docker* feature as shown in the example
+*devcontainer.json* above.
+

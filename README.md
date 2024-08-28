@@ -18,7 +18,7 @@ globally via npm.
     "ghcr.io/adaptavist/devcontainer-features/atlassian-forge:1": {
       "version": "latest"
     },
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
 
   "containerEnv": {

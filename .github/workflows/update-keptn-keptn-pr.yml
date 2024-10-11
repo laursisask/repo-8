@@ -247,7 +247,7 @@ jobs:
     - continue-on-error: true
       if: github.event_name == 'workflow_dispatch'
       name: Trigger go-utils auto update in core repo
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v3
       with:
         client-payload: '{"go-utils-target": "${{ github.sha }}"}'
         event-type: go-utils-update
@@ -256,7 +256,7 @@ jobs:
     - continue-on-error: true
       if: github.event_name == 'push'
       name: Trigger go-utils auto update in core repo
-      uses: peter-evans/repository-dispatch@v1
+      uses: peter-evans/repository-dispatch@v3
       with:
         client-payload: '{"go-utils-target": "${{ github.sha }}"}'
         event-type: go-utils-update

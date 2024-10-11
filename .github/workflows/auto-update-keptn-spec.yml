@@ -252,7 +252,7 @@ jobs:
         sudo sh -c ''echo 1 > /proc/sys/net/ipv4/ip_forward'''
     - continue-on-error: true
       name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - continue-on-error: true
       name: Extract spec tag
       run: echo "SPEC_TAG=${SPEC_REF#refs/tags/}" >> $GITHUB_ENV

@@ -252,7 +252,7 @@ jobs:
         go-version: ~1.16
     - continue-on-error: true
       name: Check out code into the Go module directory
-      uses: actions/checkout@v3.0.2
+      uses: actions/checkout@v4.2.1
     - continue-on-error: true
       name: Check Version
       run: 'CODE_VERSION=`grep "const MonitoringAsCode" pkg/version/version.go | awk

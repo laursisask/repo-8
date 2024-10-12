@@ -82,7 +82,7 @@ multihash = "0.11.4"
 mp4 = "0.13.0"
 png_pong = "0.8.2"
 range-set = "0.0.9"
-ring = "0.16.20"
+ring = "0.17.8"
 riff = "1.0.1"
 schemars = { version = "0.8.12", optional = true }
 serde = { version = "1.0.137", features = ["derive"] }

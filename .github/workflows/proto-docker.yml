@@ -272,7 +272,7 @@ jobs:
         username: ${{ secrets.DOCKERHUBTM_USERNAME }}
     - continue-on-error: true
       name: Publish to Docker Hub
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v6
       with:
         context: ./contrib/devtools
         file: ./contrib/devtools/dockerfile

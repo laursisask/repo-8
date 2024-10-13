@@ -263,7 +263,7 @@ jobs:
     - continue-on-error: true
       if: env.GIT_DIFF
       name: golangci-lint
-      uses: golangci/golangci-lint-action@v2
+      uses: golangci/golangci-lint-action@v6
       with:
         args: --out-format=tab
         skip-go-installation: true

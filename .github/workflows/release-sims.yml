@@ -503,7 +503,7 @@ jobs:
 
         '
     - continue-on-error: true
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v4.1.1
       with:
         key: ${{ runner.os }}-go-runsim-binary
         path: ~/go/bin
@@ -759,7 +759,7 @@ jobs:
     - continue-on-error: true
       uses: actions/checkout@v2
     - continue-on-error: true
-      uses: actions/cache@v2.1.6
+      uses: actions/cache@v4.1.1
       with:
         key: ${{ runner.os }}-go-runsim-binary
         path: ~/go/bin

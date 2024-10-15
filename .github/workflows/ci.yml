@@ -786,7 +786,7 @@ jobs:
       name: cache rust
       uses: Swatinem/rust-cache@v2
     - continue-on-error: true
-      uses: mymindstorm/setup-emsdk@v12
+      uses: mymindstorm/setup-emsdk@v14
       with:
         actions-cache-folder: emsdk-cache
         version: 3.1.32

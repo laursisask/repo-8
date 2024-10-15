@@ -2485,7 +2485,7 @@ jobs:
         path: dist
     - continue-on-error: true
       name: install & test
-      uses: uraimo/run-on-arch-action@v2.5.0
+      uses: uraimo/run-on-arch-action@v2.7.2
       with:
         arch: ${{ matrix.target }}
         distro: ${{ matrix.distro }}

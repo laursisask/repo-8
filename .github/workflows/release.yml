@@ -266,7 +266,7 @@ jobs:
       run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
     - continue-on-error: true
       name: Yarn Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
         path: ${{ steps.yarn-cache-dir-path.outputs.dir }}

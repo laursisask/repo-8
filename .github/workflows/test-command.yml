@@ -299,7 +299,7 @@ jobs:
         reactions: heart, hooray, laugh
     - continue-on-error: true
       name: Add reaction
-      uses: peter-evans/create-or-update-comment@v2
+      uses: peter-evans/create-or-update-comment@v4
       with:
         comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
         reactions: hooray

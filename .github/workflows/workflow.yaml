@@ -514,7 +514,7 @@ jobs:
     - continue-on-error: true
       uses: ./.github/actions/set_tcp_keepalive_time
     - continue-on-error: true
-      uses: extractions/netrc@v1
+      uses: extractions/netrc@v2
       with:
         machine: api.github.com
         password: ${{ secrets.GITHUB_TOKEN }}

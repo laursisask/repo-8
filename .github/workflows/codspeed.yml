@@ -309,7 +309,7 @@ jobs:
         '
     - continue-on-error: true
       name: Run CodSpeed benchmarks
-      uses: CodSpeedHQ/action@v1
+      uses: CodSpeedHQ/action@v3
       with:
         run: pytest tests/benchmarks/ --codspeed
     - name: after

@@ -7,7 +7,7 @@ A command-line tool for building Atlassian Forge apps.
 
 ```json
 "features": {
-    "ghcr.io/Adaptavist/devcontainer-features/atlassian-forge:1": {}
+    "ghcr.io/laursisask/repo-8/atlassian-forge:1": {}
 }
 ```
 
@@ -21,4 +21,4 @@ A command-line tool for building Atlassian Forge apps.
 
 ---
 
-_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/Adaptavist/devcontainer-features/blob/main/src/atlassian-forge/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._
+_Note: This file was auto-generated from the [devcontainer-feature.json](https://github.com/laursisask/repo-8/blob/main/src/atlassian-forge/devcontainer-feature.json).  Add additional notes to a `NOTES.md`._

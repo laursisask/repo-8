@@ -14,7 +14,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/lib/pq v1.10.4
-	github.com/miekg/pkcs11 v1.0.3
+	github.com/miekg/pkcs11 v1.1.1
 	github.com/mozilla-services/yaml v0.0.0-20191106225358-5c216288813c
 	github.com/sirupsen/logrus v1.8.1
 	github.com/youtube/vitess v2.1.1+incompatible

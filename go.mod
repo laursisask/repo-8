@@ -3,7 +3,7 @@ module github.com/mozilla-services/autograph
 go 1.22.1
 
 require (
-	github.com/DataDog/datadog-go v3.7.2+incompatible
+	github.com/DataDog/datadog-go v4.8.3+incompatible
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.32.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.43
@@ -16,7 +16,7 @@ require (
 	github.com/lib/pq v1.10.4
 	github.com/miekg/pkcs11 v1.0.3
 	github.com/mozilla-services/yaml v0.0.0-20191106225358-5c216288813c
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.3
 	github.com/youtube/vitess v2.1.1+incompatible
 	go.mozilla.org/cose v0.0.0-20200221144611-2ea72a6b3de3
 	go.mozilla.org/hawk v0.0.0-20190327210923-a483e4a7047e
@@ -39,6 +39,7 @@ require (
 	github.com/Azure/go-autorest/autorest/validation v0.2.0 // indirect
 	github.com/Azure/go-autorest/logger v0.1.0 // indirect
 	github.com/Azure/go-autorest/tracing v0.5.0 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/aws/aws-sdk-go v1.42.15 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.6 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.41 // indirect

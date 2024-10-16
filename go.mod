@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	github.com/bradleyfalzon/ghinstallation/v2 v2.2.0
+	github.com/bradleyfalzon/ghinstallation/v2 v2.11.0
 	github.com/google/go-github/v65 v65.0.0
 	github.com/migueleliasweb/go-github-mock v0.0.16
 	github.com/prometheus/client_golang v1.14.0
@@ -22,6 +22,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-github/v50 v50.1.0 // indirect
+	github.com/google/go-github/v62 v62.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect

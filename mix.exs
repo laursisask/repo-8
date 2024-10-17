@@ -60,7 +60,7 @@ defmodule AshGenServer.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ash, "~> 2.2"},
+      {:ash, "~> 3.4"},
       {:credo, "~> 1.6", only: [:dev, :test]},
       {:dialyxir, "~> 1.2", only: [:dev, :test], runtime: false},
       {:doctor, "~> 0.18", only: [:dev, :test]},
